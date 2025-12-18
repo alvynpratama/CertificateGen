@@ -1,7 +1,7 @@
 // client/src/services/midtransService.js
 
 // URL Backend Anda (Localhost port 5000)
-const API_URL = "http://localhost:5000/api";
+const API_URL = "https://certificate-generator-api-cbevh3d8bxhcgjhy.southeastasia-01.azurewebsites.net/api";
 
 export const createTransaction = async (orderData) => {
     try {
