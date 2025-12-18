@@ -1,0 +1,324 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;400;600&family=Pinyon+Script&family=Great+Vibes&family=Playfair+Display&display=swap');
+
+:root {
+  /* --- LIGHT MODE --- */
+  --bg-gradient: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
+  --text-main: #2d0f59;
+  --text-muted: #6b5b95;
+  
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.8);
+  --glass-shadow: 0 8px 32px 0 rgba(142, 68, 173, 0.1);
+  --backdrop-blur: blur(24px);
+  
+  --input-bg: rgba(255, 255, 255, 0.9);
+  --input-border: 1px solid rgba(147, 112, 219, 0.3);
+  --input-text: #2d0f59;
+  --placeholder: #9e9eb0;
+  --bg-element: rgba(255, 255, 255, 0.5);
+  --bg-panel: #ffffff;
+
+  --primary: #8e44ad;
+  --primary-gradient: linear-gradient(135deg, #8e44ad 0%, #c0392b 100%);
+  --danger: #ff4757;
+  --selection-color: #8e44ad;
+}
+
+/* --- DARK MODE --- */
+.dark-theme {
+  --bg-gradient: linear-gradient(to bottom, #000000 0%, #0a0510 100%);
+  --text-main: #ffffff;
+  --text-muted: #a3a3a3;
+  
+  --glass-bg: rgba(20, 20, 30, 0.95);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.9);
+  
+  --input-bg: #000000;
+  --input-border: 1px solid rgba(255, 255, 255, 0.15);
+  --input-text: #ffffff;
+  --placeholder: #525252;
+  --bg-element: rgba(255, 255, 255, 0.05);
+  --bg-panel: #1a1a1a;
+
+  --primary: #d8b4fe;
+  --primary-gradient: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+  --selection-color: #d8b4fe;
+}
+
+.dark-theme option { background-color: #1a1a1a; color: #fff; }
+.dark-theme input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.7; cursor: pointer; }
+
+* { box-sizing: border-box; outline: none; }
+
+body {
+  margin: 0; padding: 0;
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  background-size: cover;
+  color: var(--text-main);
+  overflow: hidden; 
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(142, 68, 173, 0.4); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* --- LAYOUT UTAMA --- */
+.main { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
+
+.maincontainer {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 70px); /* Sisa tinggi setelah header */
+  overflow: hidden;
+  position: relative;
+}
+
+/* --- HEADER --- */
+.header {
+  height: 70px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  border-bottom: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; z-index: 100;
+}
+.header-brand { display: flex; align-items: center; gap: 12px; }
+.brand-logo { height: 34px; width: auto; object-fit: contain; }
+.brand-text { font-weight: 800; font-size: 18px; text-transform: uppercase; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.header-actions { display: flex; gap: 12px; align-items: center; }
+
+.btn-icon { 
+  background: rgba(255,255,255,0.05); border: var(--glass-border); color: var(--text-main); 
+  width: 40px; height: 40px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
+}
+.btn-icon:hover { background: var(--primary); color: white; transform: translateY(-2px); border-color: transparent; }
+
+/* --- SIDEBAR (DESKTOP) --- */
+.sidebar {
+  /* Flex item, bukan fixed overlay */
+  height: 100%;
+  background: var(--bg-panel);
+  border-right: var(--glass-border);
+  display: flex; flex-direction: column; 
+  padding: 20px;
+  
+  /* Animasi Buka Tutup */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  z-index: 90;
+  
+  /* Default State (Tergantung class JS) */
+  width: 260px; 
+  min-width: 260px; /* Mencegah penyusutan flex */
+  margin-left: 0;
+}
+
+/* KETIKA DITUTUP DI DESKTOP */
+.sidebar.closed {
+  width: 0;
+  min-width: 0;
+  padding: 20px 0; /* Hilangkan padding samping agar benar-benar hilang */
+  opacity: 0;
+  margin-left: 0;
+}
+
+/* TOMBOL TOGGLE (HAMBURGER) */
+.sidebar-toggle-btn {
+  position: absolute; /* Relative terhadap maincontainer */
+  left: 0;
+  top: 20px; /* Sedikit turun dari header */
+  width: 40px;
+  height: 40px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  z-index: 95; /* Di atas sidebar & canvas */
+  display: flex; align-items: center; justify-content: center;
+  color: var(--primary);
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+  transition: left 0.3s ease;
+}
+
+/* Geser tombol saat sidebar terbuka */
+.sidebar.open + .middle .sidebar-toggle-btn { 
+    /* Logic ini ditangani JS/CSS kombinasi atau dibiarkan di kiri (floating) */
+    /* Agar simpel, biarkan tombol di kiri, dia akan tertutup sidebar atau mengambang di atasnya */
+}
+
+/* Jika ingin tombol ikut geser: (Perlu struktur HTML khusus, tapi floating di kiri lebih aman) */
+/* Kita buat floating saja agar selalu bisa diakses */
+
+.sidebar-header h3 { margin: 0 0 15px 0; font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
+
+/* Grid Template */
+.template-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.template-item { aspect-ratio: 1.4; border-radius: 6px; overflow: hidden; border: 2px solid transparent; cursor: pointer; transition: all 0.2s; background: var(--bg-element); position: relative; }
+.template-item img { width: 100%; height: 100%; object-fit: cover; }
+.template-item:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.template-item.active { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(51, 213, 172, 0.2); }
+
+/* Upload Placeholder */
+.upload-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); gap: 5px; font-size: 11px; }
+.btn-remove-bg { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+
+/* --- MIDDLE (CANVAS AREA) --- */
+.middle { 
+  flex: 1; /* Mengisi sisa ruang */
+  position: relative; 
+  overflow: hidden; 
+  background: var(--bg-body); 
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- CONTROL PANEL (KANAN) --- */
+.control-panel {
+  width: 340px; min-width: 340px; height: 100%;
+  background: var(--glass-bg); backdrop-filter: blur(20px);
+  border-left: var(--glass-border);
+  display: flex; flex-direction: column; padding: 20px; gap: 15px;
+  overflow-y: auto; z-index: 50; box-shadow: -5px 0 15px rgba(0,0,0,0.05);
+}
+.panel-section { padding-bottom: 15px; margin-bottom: 15px; border-bottom: 1px solid rgba(142, 68, 173, 0.1); }
+.panel-label { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; letter-spacing: 1px; display: block; }
+
+/* Inputs & Toolbar Styles (Sama seperti sebelumnya) */
+.input-group { margin-bottom: 12px; position: relative; }
+.input-field { width: 100%; padding: 10px 14px; background: var(--input-bg); border: var(--input-border); border-radius: 8px; color: var(--input-text); font-size: 13px; transition: all 0.2s; }
+.input-field:focus { border-color: var(--primary); background: rgba(255,255,255,0.1); }
+.file-info-box { background: var(--input-bg); border: 1px solid var(--primary); border-radius: 8px; padding: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.file-name { font-size: 12px; color: var(--text-main); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+.style-toolbar { margin-top: 8px; padding: 10px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 10px; display: flex; flex-direction: column; gap: 10px; animation: slideDown 0.2s ease; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+.toolbar-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.toolbar-select { flex: 1; padding: 8px; border-radius: 6px; border: var(--input-border); background: var(--bg-element); color: var(--text-main); font-size: 12px; }
+.toolbar-btn { flex: 1; padding: 8px; border-radius: 6px; border: var(--input-border); background: var(--bg-element); color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.toolbar-btn.active { background: var(--primary); color: white; border-color: transparent; }
+.font-control-wrapper { display: flex; align-items: center; justify-content: center; background: var(--bg-element); border: var(--input-border); border-radius: 6px; padding: 2px; height: 36px; }
+.font-btn { background: none; border: none; cursor: pointer; padding: 0 8px; height: 100%; color: var(--text-main); display: flex; align-items: center; justify-content: center; }
+.font-btn:hover { background: rgba(128,128,128,0.2); border-radius: 4px; }
+.font-input { width: 40px; text-align: center; border: none; background: transparent; color: var(--text-main); font-weight: bold; font-size: 13px; height: 100%; }
+.no-spin::-webkit-outer-spin-button, .no-spin::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.btn-primary, .btn-secondary, .btn-danger { width: 100%; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 12px; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease; }
+.btn-primary { background: var(--primary-gradient); color: white; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(142, 68, 173, 0.5); }
+.btn-secondary { background: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid rgba(128,128,128,0.2); }
+.btn-secondary:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+.btn-danger { background: rgba(255, 71, 87, 0.1); color: var(--danger); border: 1px solid rgba(255, 71, 87, 0.2); }
+.btn-danger:hover { background: var(--danger); color: white; transform: translateY(-2px); }
+
+/* ZOOM */
+.zoom-controls-wrapper { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--glass-bg); backdrop-filter: blur(10px); padding: 6px 16px; border-radius: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); border: var(--glass-border); display: flex; align-items: center; gap: 15px; z-index: 20; }
+.zoom-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(128,128,128,0.3); background: var(--input-bg); color: var(--text-main); font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.zoom-btn:hover { background: var(--primary); color: white; border-color: transparent; }
+.zoom-label { font-weight: 700; font-size: 12px; color: var(--text-main); }
+
+/* MODALS */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); z-index: 2000; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.3s ease; }
+.auth-card, .history-card { background: var(--glass-bg); backdrop-filter: blur(24px); border: var(--glass-border); border-radius: 20px; padding: 30px; box-shadow: var(--glass-shadow); display: flex; flex-direction: column; position: relative; animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.auth-card { width: 400px; max-width: 90%; }
+.history-card { width: 500px; max-width: 95%; max-height: 85vh; }
+.auth-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 22px; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+.auth-close { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer; }
+.auth-close:hover { color: var(--danger); }
+.history-list-container { overflow-y: auto; padding-right: 5px; margin-top: 15px; }
+.history-item { background: var(--input-bg); border: 1px solid rgba(128,128,128,0.1); border-radius: 12px; padding: 15px; margin-bottom: 10px; transition: all 0.2s; }
+.history-item:hover { background: rgba(255,255,255,0.05); border-color: var(--primary); }
+.history-info strong { color: var(--text-main); font-size: 14px; }
+.history-meta { color: var(--text-muted); font-size: 11px; margin-top: 4px; }
+.btn-remove-custom { position: absolute; top: 5px; right: 5px; width: 20px; height: 20px; background: var(--danger); border-radius: 50%; border: none; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; opacity: 0; transform: scale(0.8); transition: all 0.2s; }
+.template-preview:hover .btn-remove-custom { opacity: 1; transform: scale(1); }
+.btn-remove-custom:hover { background: #ff0000; transform: scale(1.1); }
+.btn-google { width: 100%; padding: 12px; background: white; color: #555; border: 1px solid #ddd; border-radius: 12px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.btn-google:hover { background: #f8f9fa; transform: translateY(-2px); }
+.dark-theme .btn-google { background: white; color: #333; border: none; }
+.google-icon { width: 18px; height: 18px; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideDown { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
+@keyframes slideUpFade { from { transform: translateY(30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+
+/* --- RESPONSIVE FIX (MOBILE) --- */
+@media screen and (max-width: 1024px) {
+  .control-panel { width: 300px; min-width: 300px; }
+}
+
+@media screen and (max-width: 768px) {
+  body { overflow: auto; }
+  .main { height: auto; min-height: 100vh; }
+  .maincontainer { 
+    flex-direction: column; 
+    overflow: visible; 
+    height: auto;
+  }
+
+  /* 1. Canvas (Middle) Paling Atas */
+  .middle { 
+    order: 1; 
+    width: 100%; min-height: 50vh; 
+    border-bottom: var(--glass-border); 
+  }
+  .zoom-controls-wrapper { bottom: 10px; padding: 4px 12px; }
+
+  /* 2. Control Panel Di Tengah */
+  .control-panel { 
+    order: 2; 
+    width: 100%; height: auto; 
+    border-left: none; 
+    padding-bottom: 30px;
+    overflow-y: visible; 
+  }
+
+  /* 3. SIDEBAR TEMPLATE (MOBILE: BOTTOM HORIZONTAL) */
+  .sidebar { 
+    order: 3; /* Paling Bawah */
+    width: 100%; 
+    min-width: 100%;
+    height: auto; 
+    flex-direction: row; /* Horizontal */
+    overflow-x: auto; /* Scroll samping */
+    padding: 16px; 
+    border-right: none; 
+    border-top: var(--glass-border);
+    margin-left: 0;
+    opacity: 1; /* Selalu muncul */
+  }
+  
+  /* Hapus efek tutup/buka desktop di mobile */
+  .sidebar.closed { 
+    width: 100%; 
+    min-width: 100%; 
+    opacity: 1; 
+    padding: 16px;
+  }
+
+  .sidebar-toggle-btn { display: none; } /* Sembunyikan toggle di mobile */
+  .sidebar-header, .sidebar-title { display: none; }
+  
+  .sidebar-content { flex-direction: row; width: 100%; gap: 15px; }
+  
+  .template-grid { 
+    display: flex; /* Flex agar berjejer samping */
+    gap: 10px; 
+    width: max-content; 
+    padding-bottom: 0; 
+  }
+  
+  .template-item { 
+    width: 80px; 
+    height: 60px; 
+    flex-shrink: 0; 
+    aspect-ratio: auto;
+  }
+  
+  .header { padding: 0 16px; height: 60px; }
+  .brand-text { font-size: 15px; }
+}
