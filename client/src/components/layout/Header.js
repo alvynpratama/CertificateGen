@@ -14,7 +14,6 @@ const Header = ({ theme, setTheme, user, onHistoryClick, onLoginClick, onLogout 
     return (
         <header className="header">
             <div className="header-brand">
-                {/* ✅ GUNAKAN VARIABEL AppLogo DISINI */}
                 <img src={AppLogo} alt="Logo" className="brand-logo" /> 
                 <span className="brand-text">Certificate Generator</span>
             </div>

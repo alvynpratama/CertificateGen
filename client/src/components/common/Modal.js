@@ -10,7 +10,6 @@ const CustomModal = ({ config, onClose }) => {
 
     return (
         <div className="modal-overlay" onClick={type !== 'loading' ? onClose : undefined}>
-            {/* stopPropagation agar klik di dalam kotak tidak menutup modal */}
             <div className="auth-card" onClick={(e) => e.stopPropagation()} style={{textAlign: 'center', width: '380px', padding: '30px'}}>
                 
                 {/* 1. HEADER / TITLE */}
@@ -19,7 +18,6 @@ const CustomModal = ({ config, onClose }) => {
                 </div>
 
                 {/* 2. BODY / MESSAGE */}
-                {/* Style color: var(--text-main) memastikan teks terbaca di Dark/Light mode */}
                 <div style={{
                     color: 'var(--text-main)', 
                     fontSize: '14px', 
@@ -67,14 +65,14 @@ const CustomModal = ({ config, onClose }) => {
                     </div>
                 )}
 
-                {/* TIPE: ALERT (Hanya tombol OK) */}
+                {/* TIPE: ALERT */}
                 {type === 'alert' && (
                     <button className="btn-primary" onClick={onConfirm || onClose}>
                         {confirmText || 'OK'}
                     </button>
                 )}
 
-                {/* TIPE: CONFIRM (Tombol Ya & Tidak) */}
+                {/* TIPE: CONFIRM */}
                 {type === 'confirm' && (
                     <div style={{display: 'flex', gap: '12px', justifyContent: 'center'}}>
                         <button className="btn-secondary" onClick={onClose} style={{flex: 1}}>

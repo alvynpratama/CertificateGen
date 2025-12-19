@@ -7,7 +7,6 @@ import { saveAs } from 'file-saver';
 import { v4 as uuidv4 } from 'uuid';
 import '../styles/global.css';
 
-// ✅ IMPORT SERVICE BACKEND
 import { createTransaction, loadSnapScript } from '../services/midtransService';
 
 import Header from '../components/layout/Header';
@@ -43,8 +42,7 @@ function Homepage() {
             if (storedUser) { setUser(JSON.parse(storedUser)); setIsAdmin(false); }
         }
 
-        // ✅ LOAD MIDTRANS SCRIPT
-        // Pastikan Client Key ini sama dengan yang ada di Dashboard Midtrans Sandbox
+        // LOAD MIDTRANS SCRIPT
         loadSnapScript(process.env.REACT_APP_MIDTRANS_CLIENT_KEY || 'SB-Mid-client-XXXXXXXXXXXXXXXX'); 
 
     }, []);
@@ -218,7 +216,7 @@ function Homepage() {
 
     // --- GENERATE & PAYMENT LOGIC ---
     
-    // ✅ Logic Simpan History (Hanya jika User Login)
+    // Logic Simpan History (Hanya jika User Login)
     const saveToHistory = (count, cost) => { 
         if (!user) return; // Jika guest, tidak simpan history
         
@@ -242,7 +240,7 @@ function Homepage() {
     const handleHistoryReDownload = (item) => { setShowHistory(false); executeZip(item.qty, item.fullData); };
     const resetAllInputs = () => { setExcelData([]); setGenerateQty(0); setCurrentIndex(0); setName(''); setHeading(''); setDesc(''); setAuthor(''); setDate(''); setQrContent(''); setExtraTexts([]); };
 
-    // ✅ LOGIC HITUNG HARGA
+    // LOGIC HITUNG HARGA
     const calculatePrice = (qty) => {
         if (qty <= 30) return 0;
         if (qty <= 100) return 30000;
@@ -250,7 +248,7 @@ function Homepage() {
         return 75000; 
     };
 
-    // ✅ HANDLE UTAMA (Cek Guest/User & Harga)
+    // HANDLE UTAMA (Cek Guest/User & Harga)
     const handleMainAction = async () => {
         if(excelData.length === 0) { executeSinglePDF(); return; }
 
@@ -281,13 +279,12 @@ function Homepage() {
         }
     };
 
-    // ✅ FUNGSI BARU: PROSES MIDTRANS (PROFESIONAL)
+    // FUNGSI BARU: PROSES MIDTRANS
     const processMidtransPayment = async (qty, price) => {
         setIsProcessing(true);
         try {
-            // 1. Persiapkan Data Order
             const orderData = {
-                order_id: `CERT-${uuidv4().slice(0,8)}`, // ID Unik
+                order_id: `CERT-${uuidv4().slice(0,8)}`,
                 gross_amount: price,
                 customer_details: {
                     first_name: user?.name || "Guest",
@@ -301,18 +298,14 @@ function Homepage() {
                 }]
             };
 
-            // 2. Minta Token ke Backend (Lewat Service)
             console.log("Meminta token ke backend...");
             const snapToken = await createTransaction(orderData); 
             
             setIsProcessing(false);
 
-            // 3. Tampilkan Snap Popup
             if (window.snap) {
                 window.snap.pay(snapToken, {
                     onSuccess: function(result){
-                        // Pembayaran Berhasil -> Simpan DB (via webhook idealnya) & Cetak
-                        // Disini kita langsung cetak karena webhook butuh IP public
                         saveToHistory(qty, price);
                         executeZip(qty, null, price);
                     },
