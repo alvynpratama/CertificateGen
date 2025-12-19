@@ -17,7 +17,6 @@ const ComponentToPrint = ({
     const itemsRef = useRef({});
     const [target, setTarget] = useState(null);
 
-    // Update target
     useEffect(() => {
         if (!selectedId || !isPreview) {
             setTarget(null);
@@ -63,7 +62,6 @@ const ComponentToPrint = ({
                     cursor: isPreview ? 'move' : 'default',
                     border: (isPreview && selectedId === id) ? '1px dashed #8e44ad' : '1px solid transparent',
                     padding: '5px',
-                    // Padding top ekstra untuk Author agar garis tidak menempel huruf
                     paddingTop: id === 'author' ? '10px' : '5px', 
                     whiteSpace: 'normal',
                     wordWrap: 'break-word',
@@ -72,15 +70,15 @@ const ComponentToPrint = ({
                     boxSizing: 'border-box'
                 }}
             >
-                {/* ✅ LOGIC GARIS PENANDATANGAN */}
+                {/* LOGIC GARIS PENANDATANGAN */}
                 {id === 'author' && (
                     <div style={{
                         position: 'absolute',
                         top: 0,
                         left: '50%',
                         transform: 'translateX(-50%)',
-                        width: '80%', // Garis sepanjang 80% lebar kotak
-                        borderTop: `2px solid ${s.color || '#000'}`, // Warna garis mengikuti warna teks
+                        width: '80%',
+                        borderTop: `2px solid ${s.color || '#000'}`,
                         opacity: 0.7
                     }}></div>
                 )}

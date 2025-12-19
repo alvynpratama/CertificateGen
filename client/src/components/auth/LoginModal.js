@@ -4,7 +4,6 @@ import { auth, googleProvider } from "../../config/firebase";
 import emailjs from '@emailjs/browser';
 import { emailConfig } from "../../config/emailjs";
 
-// Tambahkan prop 'onShowAlert'
 const LoginModal = ({ isOpen, onClose, onLogin, onShowAlert }) => {
     const [view, setView] = useState('login'); 
     
@@ -74,7 +73,6 @@ const LoginModal = ({ isOpen, onClose, onLogin, onShowAlert }) => {
             setIsLoading(false);
             
             if (isSent) {
-                // GANTI ALERT DENGAN MODAL CANTIK
                 onShowAlert({
                     title: 'OTP Terkirim',
                     message: `Kode verifikasi telah dikirim ke ${email}. Cek Inbox/Spam.`,
@@ -93,7 +91,6 @@ const LoginModal = ({ isOpen, onClose, onLogin, onShowAlert }) => {
             existingUsers.push(newUser);
             localStorage.setItem('registered_users', JSON.stringify(existingUsers));
             
-            // GANTI ALERT DENGAN MODAL CANTIK
             onShowAlert({
                 title: 'Registrasi Berhasil',
                 message: 'Akun Anda berhasil dibuat. Silakan Login.',
@@ -205,8 +202,7 @@ const LoginModal = ({ isOpen, onClose, onLogin, onShowAlert }) => {
         }
     };
 
-    // --- RENDER UI (Tidak berubah banyak, hanya logic alert di atas) ---
-    // Gunakan return JSX yang sama seperti sebelumnya
+    // RENDER UI
     const getTitle = () => {
         switch(view) {
             case 'login': return 'LOGIN AKUN';

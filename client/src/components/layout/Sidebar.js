@@ -10,7 +10,7 @@ const MenuIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="non
 const Sidebar = ({ 
     currentTemplate, setTemplate, 
     onUploadBackground, 
-    customBackgrounds, activeCustomBg, onSelectCustomBg, onRemoveCustomBg, // ✅ Props Baru
+    customBackgrounds, activeCustomBg, onSelectCustomBg, onRemoveCustomBg,
     theme, isOpen, setIsOpen 
 }) => {
     
@@ -33,7 +33,7 @@ const Sidebar = ({
                 </div>
 
                 <div className="template-grid">
-                    {/* 1. TOMBOL UPLOAD (Selalu Ada) */}
+                    {/* 1. TOMBOL UPLOAD */}
                     <div className="template-item" onClick={() => document.getElementById('bg-upload-sidebar').click()}>
                         <input type="file" id="bg-upload-sidebar" hidden accept="image/*" onChange={onUploadBackground} />
                         <div className="upload-placeholder">
@@ -42,7 +42,7 @@ const Sidebar = ({
                         </div>
                     </div>
 
-                    {/* 2. CUSTOM BACKGROUNDS (Array) */}
+                    {/* 2. CUSTOM BACKGROUNDS */}
                     {customBackgrounds && customBackgrounds.map((bg, idx) => (
                         <div 
                             key={`custom-${idx}`} 

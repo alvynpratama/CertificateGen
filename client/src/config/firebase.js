@@ -1,9 +1,7 @@
-// src/config/firebase.js
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
-// ⚠️ GANTI BAGIAN INI DENGAN CONFIG DARI FIREBASE CONSOLE ANDA ⚠️
 const firebaseConfig = {
     apiKey: "AIzaSyBZckGXymW_c7JWUaHJkTISKiwUPuSi-B8",
     authDomain: "certificate-generator-d0960.firebaseapp.com",

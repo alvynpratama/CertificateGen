@@ -72,7 +72,7 @@ const HistoryModal = ({ isOpen, onClose, user, onReDownload }) => {
                     )}
                 </div>
                 
-                {/* Note Kaki */}
+                {/* Foot Note */}
                 <div style={{marginTop:'15px', borderTop:'1px solid var(--border-color)', paddingTop:'10px', fontSize:'10px', color:'var(--text-muted)', textAlign:'center'}}>
                     * Riwayat disimpan lokal di browser selama 7 hari.
                 </div>

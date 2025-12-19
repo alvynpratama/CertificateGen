@@ -1,6 +1,3 @@
-// client/src/services/midtransService.js
-
-// URL Backend Anda (Localhost port 5000)
 const API_URL = "https://certificate-generator-api-cbevh3d8bxhcgjhy.southeastasia-01.azurewebsites.net/api";
 
 export const createTransaction = async (orderData) => {
@@ -19,7 +16,7 @@ export const createTransaction = async (orderData) => {
             throw new Error(data.message || "Gagal membuat transaksi");
         }
 
-        return data.token; // Mengembalikan Snap Token dari Backend
+        return data.token;
     } catch (error) {
         console.error("Midtrans Service Error:", error);
         throw error;
@@ -28,7 +25,6 @@ export const createTransaction = async (orderData) => {
 
 export const loadSnapScript = (clientKey) => {
     return new Promise((resolve) => {
-        // Cek jika script sudah ada agar tidak double
         if (document.getElementById('midtrans-script')) {
             resolve(true);
             return;

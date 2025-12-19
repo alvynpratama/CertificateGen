@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-// ✅ FIX IMPORT PATH (Naik 2 level: common -> components -> src -> styles)
 import '../../styles/global.css';
 
 const AdminModal = ({ isOpen, onClose, onLoginSuccess, isAdminMode = false }) => {
@@ -77,7 +76,7 @@ const AdminModal = ({ isOpen, onClose, onLoginSuccess, isAdminMode = false }) =>
         setIsLoading(false);
     };
 
-    // --- TAMPILAN KHUSUS ADMIN (GOLD) ---
+    // --- TAMPILAN KHUSUS ADMIN  ---
     if (isAdminMode) {
         return (
             <div className="modal-overlay">
@@ -110,7 +109,7 @@ const AdminModal = ({ isOpen, onClose, onLoginSuccess, isAdminMode = false }) =>
         );
     }
 
-    // --- TAMPILAN USER BIASA (BLUE) ---
+    // --- TAMPILAN USER BIASA ---
     return (
         <div className="modal-overlay">
             <div className="auth-modal-card">

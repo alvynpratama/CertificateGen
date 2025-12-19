@@ -125,7 +125,7 @@ const ControlPanel = (props) => {
                 <span className="panel-label">KONTEN SERTIFIKAT</span>
                 {renderInput('heading', 'Judul Sertifikat', heading)}
                 
-                {/* ✅ INPUT NAMA DENGAN NOTES */}
+                {/* INPUT NAMA DENGAN NOTES */}
                 <div className="input-group">
                     <input type="text" className="input-field" placeholder="Nama Peserta" value={name} onChange={(e) => updateTextContent('name', e.target.value)} onFocus={() => handleFocus('name')} />
                     <div style={{fontSize:'10px', color:'var(--text-muted)', marginTop:'2px', marginLeft:'2px'}}>Gunakan tanda titik koma (;) untuk banyak nama</div>
@@ -137,7 +137,7 @@ const ControlPanel = (props) => {
                     {selectedId === 'desc' && <StyleToolbar fieldKey="desc" styleData={getTextStyle('desc')} handleStyleChange={handleStyleChange} />}
                 </div>
 
-                {/* ✅ EXTRA TEXTS DENGAN TOMBOL HAPUS */}
+                {/* EXTRA TEXTS DENGAN TOMBOL HAPUS */}
                 {extraTexts && extraTexts.map((t, idx) => (
                     <div key={t.id} style={{marginBottom:'10px'}}>
                         <div style={{display:'flex', gap:'5px'}}>
