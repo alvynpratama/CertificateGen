@@ -1,19 +1,26 @@
-version: '3.8'
-
 services:
-  cert-frontend:
-    build: .
-    container_name: certificate-app
+  # 1. Container Backend (Server)
+  server-app:
+    build: 
+      context: ./server    # Menggunakan Dockerfile di folder server
+    container_name: local-backend
     ports:
-      - "3000:3000"  # Port React
-      - "5000:5000"  # Port Backend (Server.js) <--- WAJIB DITAMBAH
-    volumes:
-      - ./src:/app/src
-      - ./public:/app/public
-      # Abaikan node_modules agar pakai versi container
-      - /app/node_modules
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-      # Pastikan file .env dibaca
+      - "5000:5000"        # Host:Container
     env_file:
-      - .env
+      - ./server/.env      # Membaca env khusus server
+    environment:
+      - PORT=5000          # Memastikan port internal benar
+
+  # 2. Container Frontend (Client - Nginx)
+  client-app:
+    build:
+      context: ./client    # Menggunakan Dockerfile di folder client
+      args:
+        # PENTING: Ini menyuntikkan variabel saat build React
+        # Gunakan localhost karena browser Anda (Host) yang akan mengakses API, bukan container Nginx.
+        - REACT_APP_API_URL=http://localhost:5000/api 
+    container_name: local-frontend
+    ports:
+      - "3000:80"          # Akses di browser localhost:3000, internal Nginx 80
+    depends_on:
+      - server-app         # Pastikan server jalan dulu
