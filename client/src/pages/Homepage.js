@@ -91,34 +91,42 @@ function Homepage() {
     // --- MIDTRANS RETURN HANDLER ---
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
-        const status = query.get('transaction_status');
-        const statusCode = query.get('status_code');
+        const status = query.get('transaction_status'); 
+        const statusCode = query.get('status_code');    
 
-        // Cek apakah baru balik dari Midtrans & Sukses
         if ( (status === 'settlement' || status === 'capture') && statusCode === '200' ) {
-            
-            // Ambil data yang tadi disimpan
+            console.log("✅ Payment Success Detected inside useEffect"); // LOG 1
+
             const pendingDataStr = localStorage.getItem('pending_cert_data');
             
             if (pendingDataStr) {
                 const { qty, price, dataSource } = JSON.parse(pendingDataStr);
                 
-                // Tampilkan Modal Loading
+                console.log("📦 Data Retrieved from Storage:", { qty, price, dataSourceLength: dataSource?.length }); // LOG 2
+
+                if (!dataSource || dataSource.length === 0) {
+                    console.error("❌ CRITICAL: Data Source is EMPTY!");
+                    alert("Gagal memuat data sertifikat. Hubungi Admin.");
+                    return;
+                }
+
                 setIsProcessing(true);
                 showModal({ title: 'Pembayaran Berhasil', message: 'Memulai proses generate sertifikat...', type: 'alert' });
 
-               // Async function agar bisa 'await'
                 setTimeout(async () => {
                     saveToHistory(qty, price, dataSource);
-                
+                    
+                    console.log("🚀 Starting executeZip..."); // LOG 3
                     await executeZip(qty, dataSource, price);
+                    console.log("🏁 executeZip Finished."); // LOG 4
                     
                     localStorage.removeItem('pending_cert_data');
                     window.history.replaceState({}, document.title, "/"); 
-                    
                     setIsProcessing(false);
                     
                 }, 1000);
+            } else {
+                console.warn("⚠️ No pending data found in LocalStorage");
             }
         }
     }, []);
@@ -479,7 +487,10 @@ function Homepage() {
 
     const executeZip = async (qty, dataSource, cost = 0) => {
         const el = document.getElementById('print-area');
-        if (!dataSource || dataSource.length === 0) return;
+        if (!dataSource || dataSource.length === 0) {
+            console.error("❌ ExecuteZip aborted: No DataSource");
+            return;
+        }
 
         setSelectedId(null);
         abortRef.current = false; 
@@ -487,56 +498,93 @@ function Homepage() {
         const zip = new JSZip();
 
         try {
+            console.log(`🔄 Loop started for ${qty} items`);
+
             for (let i = 0; i < qty; i++) {
-                if (abortRef.current) break;
+                // 1. Cek Abort
+                if (abortRef.current) {
+                    console.warn("⏹️ Process Aborted by User");
+                    break;
+                }
 
+                // 2. Cek Data Existence
                 const person = dataSource[i];
-                if (!person) break;
+                if (!person) {
+                    console.error(`❌ Data missing at index ${i}`);
+                    continue; // Skip if data corrupt, don't break
+                }
 
+                console.log(`📄 Processing ${i+1}/${qty}: ${person.Name || person.nama}`);
+
+                // Update Progress Modal
                 showModal({ 
                     type: 'loading', 
                     title: 'Mencetak...', 
-                    message: `Memproses data ke-${i + 1} dari ${qty}`,
+                    message: `Memproses data ke-${i + 1} dari ${qty}`, 
                     progress: i + 1, 
                     total: qty, 
                     onCancel: handleCancelProcess 
                 });
 
-                // Update Nama & ID di Canvas
-                const possibleKeys = ['Name', 'name', 'Nama', 'nama']; let pName = "User";
-                for (const key of possibleKeys) if (person[key]) { pName = person[key]; break; }
-                if(pName === "User" && Object.values(person)[0]) pName = Object.values(person)[0];
+                // --- INNER TRY-CATCH (Agar 1 error tidak mematikan semua) ---
+                try {
+                    // Update Nama & ID
+                    const possibleKeys = ['Name', 'name', 'Nama', 'nama']; let pName = "User";
+                    for (const key of possibleKeys) if (person[key]) { pName = person[key]; break; }
+                    if(pName === "User" && Object.values(person)[0]) pName = Object.values(person)[0];
 
-                const pID = uuidv4().slice(0, 8).toUpperCase();
+                    const pID = uuidv4().slice(0, 8).toUpperCase();
 
-                setName(pName); 
-                setGeneratedID(pID);
-                await new Promise(r => setTimeout(r, 300));
+                    setName(pName); 
+                    setGeneratedID(pID);
+                    
+                    // Tunggu DOM Update
+                    await new Promise(r => setTimeout(r, 500)); // Naikkan ke 500ms untuk safety
 
-                const canvas = await html2canvas(el, { scale: 1.5, useCORS: true });
-                const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
-                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width, canvas.height);
-                zip.file(`${pName}_${pID}.pdf`, pdf.output('blob'));
+                    // Cek apakah elemen ada sebelum capture
+                    if(!el) throw new Error("Print Area Element not found in DOM");
+
+                    const canvas = await html2canvas(el, { 
+                        scale: 1.5, 
+                        useCORS: true,
+                        logging: false // Matikan log internal html2canvas agar console bersih
+                    });
+
+                    const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
+                    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width, canvas.height);
+                    zip.file(`${pName}_${pID}.pdf`, pdf.output('blob'));
+
+                } catch (innerError) {
+                    console.error(`❌ Error on item ${i+1}:`, innerError);
+                    // Lanjut ke item berikutnya meski error
+                }
             }
 
-            setIsProcessing(false);
+            console.log("📦 Zipping files...");
+            
             if (!abortRef.current) {
-                setIsProcessing(true); // Pastikan loading masih tampil saat zipping
+                // Pastikan file zip tidak kosong
+                if (Object.keys(zip.files).length === 0) {
+                    throw new Error("No files were generated successfully.");
+                }
+
+                setIsProcessing(true); 
                 showModal({ type: 'loading', title: 'Compressing...', message: 'Sedang membuat file ZIP...', progress: qty, total: qty });
                 
                 const content = await zip.generateAsync({ type: 'blob' });
                 saveAs(content, 'Certificates.zip');
                 
-                // Modal Selesai
-                showModal({ title: 'Selesai', message: 'Download berhasil dimulai!', type: 'alert', onConfirm: () => { closeModal(); resetAllInputs(); } });
+                console.log("✅ Download Triggered");
+                showModal({ title: 'Selesai', message: 'Download berhasil dimulai!', type: 'alert', confirmText: 'OK', onConfirm: () => { closeModal(); resetAllInputs(); } });
             }
         } catch (e) { 
+            console.error("❌ FATAL ERROR in executeZip:", e);
             setIsProcessing(false); 
-            closeModal(); 
-            alert("Error saat generate: " + e.message); 
+            // Jangan closeModal() otomatis biar user bisa baca error
+            showModal({ title: 'Error', message: 'Terjadi kesalahan: ' + e.message, type: 'alert' });
         }
-
-        return true;
+        
+        return true; 
     };
 
     const finalQrValue = qrContent.trim() !== '' ? qrContent : generatedID;
