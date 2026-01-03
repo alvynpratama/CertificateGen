@@ -405,11 +405,17 @@ app.post('/api/log-activity', async (req, res) => {
 app.post('/api/create-transaction', async (req, res) => {
     try {
         const { order_id, gross_amount, customer_details, item_details } = req.body;
+        const frontEndUrl = process.env.CLIENT_URL || 'http://localhost:3000';
         let parameter = {
             "transaction_details": { "order_id": order_id, "gross_amount": gross_amount },
             "credit_card":{ "secure" : true },
             "customer_details": customer_details,
-            "item_details": item_details
+            "item_details": item_details,
+            "callbacks": {
+                "finish": `${frontEndUrl}?status=success&order_id=${order_id}`,
+                "error": `${frontEndUrl}?status=error`,
+                "pending": `${frontEndUrl}?status=pending`
+            }
         };
 
         const transaction = await snap.createTransaction(parameter);
