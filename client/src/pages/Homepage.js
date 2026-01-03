@@ -88,6 +88,7 @@ function Homepage() {
         const handleResize = () => { const w = window.innerWidth; if (w < 768) setZoom(0.35); else if (w < 1200) setZoom(0.45); else setZoom(0.55); };
         handleResize(); window.addEventListener('resize', handleResize); return () => window.removeEventListener('resize', handleResize);
     }, []);
+    // --- MIDTRANS RETURN HANDLER ---
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
         const status = query.get('transaction_status');
@@ -106,14 +107,17 @@ function Homepage() {
                 setIsProcessing(true);
                 showModal({ title: 'Pembayaran Berhasil', message: 'Memulai proses generate sertifikat...', type: 'alert' });
 
-                // JALANKAN GENERATE
-                setTimeout(() => {
+               // Async function agar bisa 'await'
+                setTimeout(async () => {
                     saveToHistory(qty, price, dataSource);
-                    executeZip(qty, dataSource, price);
+                
+                    await executeZip(qty, dataSource, price);
                     
-                    // Bersihkan Storage & URL
                     localStorage.removeItem('pending_cert_data');
-                    window.history.replaceState({}, document.title, "/");
+                    window.history.replaceState({}, document.title, "/"); 
+                    
+                    setIsProcessing(false);
+                    
                 }, 1000);
             }
         }
