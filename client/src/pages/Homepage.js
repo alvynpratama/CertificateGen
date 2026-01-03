@@ -482,7 +482,8 @@ function Homepage() {
         if (!dataSource || dataSource.length === 0) return;
 
         setSelectedId(null);
-        abortRef.current = false; setIsProcessing(true);
+        abortRef.current = false; 
+        setIsProcessing(true);
         const zip = new JSZip();
 
         try {
@@ -492,7 +493,14 @@ function Homepage() {
                 const person = dataSource[i];
                 if (!person) break;
 
-                showModal({ type: 'loading', title: 'Mencetak...', message: `${i + 1}/${qty}`, progress: i + 1, total: qty, onCancel: handleCancelProcess });
+                showModal({ 
+                    type: 'loading', 
+                    title: 'Mencetak...', 
+                    message: `Memproses data ke-${i + 1} dari ${qty}`,
+                    progress: i + 1, 
+                    total: qty, 
+                    onCancel: handleCancelProcess 
+                });
 
                 // Update Nama & ID di Canvas
                 const possibleKeys = ['Name', 'name', 'Nama', 'nama']; let pName = "User";
@@ -501,21 +509,34 @@ function Homepage() {
 
                 const pID = uuidv4().slice(0, 8).toUpperCase();
 
-                setName(pName); setGeneratedID(pID);
-                await new Promise(r => setTimeout(r, 200));
+                setName(pName); 
+                setGeneratedID(pID);
+                await new Promise(r => setTimeout(r, 300));
 
                 const canvas = await html2canvas(el, { scale: 1.5, useCORS: true });
                 const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
                 pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width, canvas.height);
                 zip.file(`${pName}_${pID}.pdf`, pdf.output('blob'));
             }
+
             setIsProcessing(false);
             if (!abortRef.current) {
+                setIsProcessing(true); // Pastikan loading masih tampil saat zipping
+                showModal({ type: 'loading', title: 'Compressing...', message: 'Sedang membuat file ZIP...', progress: qty, total: qty });
+                
                 const content = await zip.generateAsync({ type: 'blob' });
                 saveAs(content, 'Certificates.zip');
-                showModal({ title: 'Selesai', message: 'Berhasil!', type: 'alert', onConfirm: () => { closeModal(); resetAllInputs(); } });
+                
+                // Modal Selesai
+                showModal({ title: 'Selesai', message: 'Download berhasil dimulai!', type: 'alert', onConfirm: () => { closeModal(); resetAllInputs(); } });
             }
-        } catch (e) { setIsProcessing(false); closeModal(); alert(e.message); }
+        } catch (e) { 
+            setIsProcessing(false); 
+            closeModal(); 
+            alert("Error saat generate: " + e.message); 
+        }
+
+        return true;
     };
 
     const finalQrValue = qrContent.trim() !== '' ? qrContent : generatedID;
