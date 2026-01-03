@@ -427,7 +427,10 @@ function Homepage() {
                     price: price,
                     quantity: 1,
                     name: `Cetak ${qty} Sertifikat`
-                }]
+                }],
+                callbacks: {
+                    finish: window.location.href
+                }
             };
 
             const snapToken = await createTransaction(orderData);
@@ -436,14 +439,14 @@ function Homepage() {
             if (window.snap) {
                 window.snap.pay(snapToken, {
                     onSuccess: function (result) {
-                        localStorage.removeItem('pending_cert_data');
-                        saveToHistory(qty, price, dataSource);
-                        executeZip(qty, dataSource, price);
+                        console.log("Payment Success (Popup callback)");
                     },
                     onPending: function (result) {
-                        showModal({ title: 'Pending', message: 'Menunggu pembayaran...', type: 'alert' });
+                        console.log("Payment Pending");
                     },
                     onError: function (result) {
+                        console.log("Payment Error");
+                        localStorage.removeItem('pending_cert_data');
                         showModal({ title: 'Gagal', message: 'Pembayaran gagal!', type: 'alert' });
                     },
                     onClose: function () {
