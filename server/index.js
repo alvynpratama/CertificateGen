@@ -441,6 +441,48 @@ app.post('/api/create-transaction', async (req, res) => {
     }
 });
 
+app.post('/api/midtrans-notification', async (req, res) => {
+    try {
+        const statusResponse = await snap.transaction.notification(req.body);
+        const orderId = statusResponse.order_id;
+        const transactionStatus = statusResponse.transaction_status;
+        const fraudStatus = statusResponse.fraud_status;
+
+        console.log(`Receiving Notification for Order: ${orderId} | Status: ${transactionStatus}`);
+
+        let finalStatus = 'pending';
+
+        if (transactionStatus == 'capture') {
+            if (fraudStatus == 'challenge') {
+                finalStatus = 'challenge';
+            } else if (fraudStatus == 'accept') {
+                finalStatus = 'success'; 
+            }
+        } else if (transactionStatus == 'settlement') {
+            finalStatus = 'settlement';
+        } else if (transactionStatus == 'cancel' || transactionStatus == 'deny' || transactionStatus == 'expire') {
+            finalStatus = 'failed';
+        } else if (transactionStatus == 'pending') {
+            finalStatus = 'pending';
+        }
+
+        // Update Database Azure
+        const pool = await sql.connect(dbConfig);
+        await pool.request()
+            .input('Status', sql.VarChar, finalStatus)
+            .input('OrderId', sql.VarChar, orderId)
+            .query("UPDATE Transactions SET status = @Status WHERE order_id = @OrderId");
+
+        console.log(`Transaction ${orderId} updated to ${finalStatus}`);
+        
+        res.status(200).send('OK');
+
+    } catch (err) {
+        console.error("Notification Error:", err.message);
+        res.status(500).send(err.message);
+    }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Backend Server running on port ${PORT}`);
