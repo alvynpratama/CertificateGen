@@ -95,17 +95,24 @@ function Homepage() {
         const statusCode = query.get('status_code');    
 
         if ( (status === 'settlement' || status === 'capture') && statusCode === '200' ) {
-            console.log("✅ Payment Success Detected inside useEffect"); // LOG 1
+            console.log("Payment Success Detected inside useEffect");
 
             const pendingDataStr = localStorage.getItem('pending_cert_data');
             
             if (pendingDataStr) {
                 const { qty, price, dataSource } = JSON.parse(pendingDataStr);
+
+                let currentUser = null;
+                const storedAdmin = localStorage.getItem('adminUser');
+                const storedUser = localStorage.getItem('certUser');
+                
+                if (storedAdmin) currentUser = JSON.parse(storedAdmin);
+                else if (storedUser) currentUser = JSON.parse(storedUser);
                 
                 console.log("📦 Data Retrieved from Storage:", { qty, price, dataSourceLength: dataSource?.length }); // LOG 2
 
                 if (!dataSource || dataSource.length === 0) {
-                    console.error("❌ CRITICAL: Data Source is EMPTY!");
+                    console.error("CRITICAL: Data Source is EMPTY!");
                     alert("Gagal memuat data sertifikat. Hubungi Admin.");
                     return;
                 }
@@ -114,11 +121,11 @@ function Homepage() {
                 showModal({ title: 'Pembayaran Berhasil', message: 'Memulai proses generate sertifikat...', type: 'alert' });
 
                 setTimeout(async () => {
-                    saveToHistory(qty, price, dataSource);
+                    saveToHistory(qty, price, dataSource, currentUser);
                     
-                    console.log("🚀 Starting executeZip..."); // LOG 3
+                    console.log("Starting executeZip...");
                     await executeZip(qty, dataSource, price);
-                    console.log("🏁 executeZip Finished."); // LOG 4
+                    console.log("executeZip Finished.");
                     
                     localStorage.removeItem('pending_cert_data');
                     window.history.replaceState({}, document.title, "/"); 
@@ -126,7 +133,7 @@ function Homepage() {
                     
                 }, 1000);
             } else {
-                console.warn("⚠️ No pending data found in LocalStorage");
+                console.warn("No pending data found in LocalStorage");
             }
         }
     }, []);
@@ -277,10 +284,13 @@ function Homepage() {
     // --- LOGIC UTAMA ---
 
     // 1. Simpan ke Database & Local
-    const saveToHistory = (count, cost, dataUsed) => {
+    const saveToHistory = (count, cost, dataUsed, currentUserOverride = null) => {
+
+        const finalUser = currentUserOverride || user;
+
         const activityData = {
-            email: user ? user.email : 'Guest',
-            name: user ? user.name : 'Guest',
+            email: finalUser ? finalUser.email : 'Guest',
+            name: finalUser ? finalUser.name : 'Guest',
             type: dataUsed.length > 1 ? 'Batch Generate' : 'Single PDF',
             details: `Jumlah: ${count} | Biaya: ${cost}`
         };
@@ -292,7 +302,7 @@ function Homepage() {
             body: JSON.stringify(activityData)
         }).catch(err => console.error("Gagal simpan log:", err));
 
-        if (!user) return;
+        if (!finalUser) return;
 
         const newEntry = {
             id: uuidv4(),
@@ -304,8 +314,8 @@ function Homepage() {
         };
 
         try {
-            const currentHistory = JSON.parse(localStorage.getItem(`history_${user.email}`) || '[]');
-            localStorage.setItem(`history_${user.email}`, JSON.stringify([newEntry, ...currentHistory]));
+            const currentHistory = JSON.parse(localStorage.getItem(`history_${finalUser.email}`) || '[]');
+            localStorage.setItem(`history_${finalUser.email}`, JSON.stringify([newEntry, ...currentHistory]));
         } catch (e) { }
     };
 
