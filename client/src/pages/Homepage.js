@@ -88,6 +88,36 @@ function Homepage() {
         const handleResize = () => { const w = window.innerWidth; if (w < 768) setZoom(0.35); else if (w < 1200) setZoom(0.45); else setZoom(0.55); };
         handleResize(); window.addEventListener('resize', handleResize); return () => window.removeEventListener('resize', handleResize);
     }, []);
+    useEffect(() => {
+        const query = new URLSearchParams(window.location.search);
+        const status = query.get('transaction_status');
+        const statusCode = query.get('status_code');
+
+        // Cek apakah baru balik dari Midtrans & Sukses
+        if ( (status === 'settlement' || status === 'capture') && statusCode === '200' ) {
+            
+            // Ambil data yang tadi disimpan
+            const pendingDataStr = localStorage.getItem('pending_cert_data');
+            
+            if (pendingDataStr) {
+                const { qty, price, dataSource } = JSON.parse(pendingDataStr);
+                
+                // Tampilkan Modal Loading
+                setIsProcessing(true);
+                showModal({ title: 'Pembayaran Berhasil', message: 'Memulai proses generate sertifikat...', type: 'alert' });
+
+                // JALANKAN GENERATE
+                setTimeout(() => {
+                    saveToHistory(qty, price, dataSource);
+                    executeZip(qty, dataSource, price);
+                    
+                    // Bersihkan Storage & URL
+                    localStorage.removeItem('pending_cert_data');
+                    window.history.replaceState({}, document.title, "/");
+                }, 1000);
+            }
+        }
+    }, []);
 
     useEffect(() => {
         const handleWheel = (e) => {
@@ -366,6 +396,12 @@ function Homepage() {
     // FUNGSI PROSES MIDTRANS (Menerima dataSource)
     const processMidtransPayment = async (qty, price, dataSource) => {
         setIsProcessing(true);
+        localStorage.setItem('pending_cert_data', JSON.stringify({
+            qty, 
+            price, 
+            dataSource,
+            timestamp: Date.now()
+        }));
         try {
             const orderData = {
                 order_id: `CERT-${uuidv4().slice(0, 8)}`,
@@ -388,8 +424,9 @@ function Homepage() {
             if (window.snap) {
                 window.snap.pay(snapToken, {
                     onSuccess: function (result) {
-                        saveToHistory(qty, price, dataSource); // Simpan history
-                        executeZip(qty, dataSource, price);    // Cetak
+                        localStorage.removeItem('pending_cert_data');
+                        saveToHistory(qty, price, dataSource);
+                        executeZip(qty, dataSource, price);
                     },
                     onPending: function (result) {
                         showModal({ title: 'Pending', message: 'Menunggu pembayaran...', type: 'alert' });
@@ -461,7 +498,7 @@ function Homepage() {
                 const pID = uuidv4().slice(0, 8).toUpperCase();
 
                 setName(pName); setGeneratedID(pID);
-                await new Promise(r => setTimeout(r, 100));
+                await new Promise(r => setTimeout(r, 200));
 
                 const canvas = await html2canvas(el, { scale: 1.5, useCORS: true });
                 const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
