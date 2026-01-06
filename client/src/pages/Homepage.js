@@ -410,7 +410,19 @@ function Homepage() {
                 executeSinglePDF(dataSource[0]); 
             } else {
                 // Batch ZIP
-                showModal({ type: 'confirm', title: 'Konfirmasi', message: `Cetak ${qty} sertifikat (Gratis)?`, confirmText: 'Mulai', onConfirm: () => { closeModal(); executeZip(qty, dataSource, 0); } });
+                showModal({ 
+                    type: 'confirm', 
+                    title: 'Konfirmasi', 
+                    message: `Cetak ${qty} sertifikat (Gratis)?`, 
+                    confirmText: 'Mulai', 
+                    onConfirm: () => { 
+                        closeModal(); 
+                        
+                        saveToHistory(qty, 0, dataSource); 
+                        
+                        executeZip(qty, dataSource, 0); 
+                    } 
+                });
             }
         }
     };
