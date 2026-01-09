@@ -240,7 +240,7 @@ body {
 @keyframes slideDown { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
 @keyframes slideUpFade { from { transform: translateY(30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
 
-/* --- RESPONSIVE FIX (MOBILE - COMPACT VERSION) --- */
+/* --- RESPONSIVE FIX (MOBILE - ULTRA COMPACT) --- */
 @media screen and (max-width: 1024px) {
   .control-panel { width: 300px; min-width: 300px; }
 }
@@ -259,54 +259,60 @@ body {
     flex-direction: column; 
     overflow: visible; 
     height: auto;
-    flex: 1; /* Agar mengisi sisa ruang */
+    flex: 1; 
   }
 
-  /* 1. HEADER LEBIH PENDEK */
+  /* 1. HEADER SUPER TIPIS */
   .header { 
-    padding: 0 10px; 
-    height: 45px; /* Tinggi header dikecilkan */
+    padding: 0 8px; 
+    height: 40px; /* Sangat pendek */
     border-bottom: var(--glass-border);
+    justify-content: space-between;
   }
-  .brand-logo { height: 20px; width: auto; } /* Logo lebih kecil */
-  .brand-text { font-size: 13px; margin-left: 8px; } /* Teks lebih kecil */
-  .header-actions .btn-icon { transform: scale(0.85); } /* Icon tombol kecil */
+  .brand-logo { height: 18px; width: auto; }
+  .brand-text { display: none; } /* Hilangkan Teks Brand agar hemat tempat */
+  
+  .header-actions { gap: 8px; }
+  .header-actions .btn-icon { transform: scale(0.8); width: 28px; height: 28px; }
   .header-actions .btn-primary { 
-    padding: 4px 12px; 
-    font-size: 11px; 
-    height: 28px;
+    padding: 0 10px; 
+    font-size: 10px; 
+    height: 24px; /* Tombol Login kecil */
   }
 
   /* 2. AREA CANVAS (MIDDLE) */
   .middle { 
     order: 1; 
     width: 100%; 
-    height: 35vh; /* Dikurangi jadi 35% agar bawah lebih lega */
-    min-height: 250px; 
+    height: 35vh; /* 35% Layar */
+    min-height: 220px; /* Batas minimal agar tidak terlalu gepeng */
     border-bottom: var(--glass-border); 
     overflow: hidden; 
     position: relative;
   }
   
   .zoom-controls-wrapper { 
-    bottom: 8px; 
-    padding: 2px 8px; 
-    transform: scale(0.9); 
+    bottom: 5px; 
+    padding: 2px 6px; 
+    transform: scale(0.8); /* Zoom control diperkecil */
     transform-origin: bottom center;
   }
 
-  /* 3. CONTROL PANEL (Form Input) */
+  /* 3. CONTROL PANEL */
   .control-panel { 
     order: 2; 
     width: 100%; 
     height: auto; 
     border-left: none; 
-    padding: 15px; 
+    padding: 12px; 
     padding-bottom: 20px;
     overflow-y: visible; 
   }
+  /* Perkecil input field di HP */
+  .input-field { height: 32px; font-size: 12px; }
+  .panel-label { font-size: 9px; margin-bottom: 6px; }
 
-  /* 4. SIDEBAR TEMPLATE (BOTTOM - SUPER COMPACT) */
+  /* 4. SIDEBAR TEMPLATE (BOTTOM - ULTRA MINI) */
   .sidebar { 
     order: 3;
     width: 100%; 
@@ -315,51 +321,32 @@ body {
     flex-direction: row;
     overflow-x: auto;
     
-    /* Padding diperkecil drastis */
-    padding: 8px 12px; 
+    /* Padding sangat tipis */
+    padding: 6px 8px; 
     
     border-right: none; 
     border-top: var(--glass-border);
     margin-left: 0;
     opacity: 1;
-    background: var(--bg-element); /* Pastikan ada background */
+    background: var(--bg-element); 
   }
   
-  .sidebar.closed { 
-    width: 100%; 
-    min-width: 100%; 
-    opacity: 1; 
-    padding: 8px 12px;
-  }
-
-  /* Sembunyikan elemen sidebar yang tidak perlu */
+  .sidebar.closed { width: 100%; min-width: 100%; opacity: 1; padding: 6px 8px; }
   .sidebar-toggle-btn { display: none; }
   .sidebar-header, .sidebar-title { display: none; }
   
-  .sidebar-content { 
-    flex-direction: row; 
-    width: 100%; 
-    gap: 8px; 
-    align-items: center;
-  }
+  .sidebar-content { flex-direction: row; width: 100%; gap: 6px; align-items: center; }
+  .template-grid { display: flex; gap: 6px; width: max-content; padding-bottom: 0; margin: 0; }
   
-  .template-grid { 
-    display: flex; 
-    gap: 8px; 
-    width: max-content; 
-    padding-bottom: 0; 
-    margin: 0;
-  }
-  
-  /* Ukuran Thumbnail Template Diperkecil */
+  /* Ukuran Thumbnail Template SANGAT KECIL */
   .template-item { 
-    width: 60px; /* Lebih kecil */
-    height: 45px; /* Lebih pendek */
+    width: 50px; 
+    height: 35px; /* Strip bawah jadi sangat tipis */
     flex-shrink: 0; 
-    aspect-ratio: auto;
-    border-radius: 4px;
+    border-radius: 3px;
   }
 
-  .upload-placeholder svg { width: 16px; height: 16px; }
-  .upload-placeholder span { font-size: 9px; }
+  /* Sembunyikan teks 'Upload' agar muat di kotak kecil */
+  .upload-placeholder span { display: none; }
+  .upload-placeholder svg { width: 14px; height: 14px; }
 }
