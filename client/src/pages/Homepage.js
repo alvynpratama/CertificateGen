@@ -22,6 +22,11 @@ import HistoryModal from '../components/common/HistoryModal';
 function Homepage() {
     const [theme, setTheme] = useState("dark");
     const [zoom, setZoom] = useState(0.55);
+
+    const [pan, setPan] = useState({ x: 0, y: 0 });
+    const [isPanning, setIsPanning] = useState(false);
+    const lastPosRef = useRef({ x: 0, y: 0 });
+
     const middleRef = useRef(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -89,6 +94,7 @@ function Homepage() {
         const handleResize = () => { const w = window.innerWidth; if (w < 768) setZoom(0.35); else if (w < 1200) setZoom(0.45); else setZoom(0.55); };
         handleResize(); window.addEventListener('resize', handleResize); return () => window.removeEventListener('resize', handleResize);
     }, []);
+    
     // --- MIDTRANS RETURN HANDLER ---
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
@@ -154,6 +160,30 @@ function Homepage() {
 
     const handleZoomIn = () => setZoom(p => Math.min(p + 0.05, 1.5));
     const handleZoomOut = () => setZoom(p => Math.max(p - 0.05, 0.1));
+
+    // --- LOGIC PANNING ---
+    const handlePointerDown = (e) => {
+        if (e.target.closest('.moveable-control-box') || e.target.closest('.moveable-line')) return;
+        
+        setIsPanning(true);
+        lastPosRef.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const handlePointerMove = (e) => {
+        if (!isPanning) return;
+        e.preventDefault();
+
+        const dx = e.clientX - lastPosRef.current.x;
+        const dy = e.clientY - lastPosRef.current.y;
+
+        setPan(prev => ({ x: prev.x + dx, y: prev.y + dy }));
+        
+        lastPosRef.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const handlePointerUp = () => {
+        setIsPanning(false);
+    };
 
     // --- DATA STATE ---
     const [name, setName] = useState('');
@@ -695,18 +725,30 @@ function Homepage() {
                     onSelectCustomBg={handleSelectCustomBg} onRemoveCustomBg={handleRemoveCustomBg}
                     theme={theme}
                 />
-
-                <div className="middle" ref={middleRef} title="Ctrl + Scroll untuk Zoom" onClick={() => setSelectedId(null)}>
-                    <div style={{ transform: `scale(${zoom})`, transformOrigin: 'center center', transition: 'transform 0.1s ease-out' }} onClick={(e) => e.stopPropagation()}>
-                        <ComponentToPrint
-                            id="template-area"
-                            isPreview={true} template={template} {...allTextProps}
-                            selectedId={selectedId} setSelectedId={setSelectedId}
-                            onStyleChange={handleStyleChange} handleImageStyleChange={handleImageStyleChange} handleQrStyleChange={handleQrStyleChange}
-                            qrStyle={qrStyle} zoom={zoom}
-                            logo={logo} customBackground={activeCustomBg} signatureImg={signatureImg}
-                            showQR={showQR} qrValue={finalQrValue} qrColor={qrColor} imageStyles={imageStyles}
-                        />
+                <div 
+                    className="middle" 
+                    ref={middleRef} 
+                    title="Klik kiri & drag untuk geser view" 
+                    onClick={() => setSelectedId(null)}
+                    
+                    // --- EVENT HANDLERS ---
+                    onPointerDown={handlePointerDown}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={handlePointerUp}
+                    onPointerLeave={handlePointerUp}
+                    
+                    // --- STYLE POINTER ---
+                    style={{ cursor: isPanning ? 'grabbing' : 'grab', touchAction: 'none' }} 
+                >
+                    <div 
+                        style={{ 
+                            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, 
+                            transformOrigin: 'center center', 
+                            transition: isPanning ? 'none' : 'transform 0.1s ease-out' 
+                        }} 
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <ComponentToPrint id="template-area" isPreview={true} template={template} {...allTextProps} selectedId={selectedId} setSelectedId={setSelectedId} onStyleChange={handleStyleChange} handleImageStyleChange={handleImageStyleChange} handleQrStyleChange={handleQrStyleChange} qrStyle={qrStyle} zoom={zoom} logo={logo} customBackground={activeCustomBg} signatureImg={signatureImg} showQR={showQR} qrValue={finalQrValue} qrColor={qrColor} imageStyles={imageStyles} showWatermark={isWatermarkActive} watermarkImg={AppLogo} />
                     </div>
 
                     <div className="zoom-controls-wrapper">
