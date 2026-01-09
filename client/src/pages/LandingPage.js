@@ -128,11 +128,11 @@ const LandingPage = () => {
                     <PricingCard 
                         title="Basic Batch" 
                         qty="31 - 100 Data"
-                        price="Rp 30.000" 
+                        price="Rp 15.000" 
                         features={[
                             "Semua Fitur Starter",
                             "Prioritas Server (Cepat)",
-                            "Simpan History 30 Hari",
+                            "Simpan History 20 Hari",
                             "Dukungan Email"
                         ]}
                     />
@@ -141,7 +141,7 @@ const LandingPage = () => {
                     <PricingCard 
                         title="Pro Batch" 
                         qty="101 - 150 Data"
-                        price="Rp 50.000" 
+                        price="Rp 40.000" 
                         isPopular={true}
                         features={[
                             "Semua Fitur Basic",
@@ -155,12 +155,12 @@ const LandingPage = () => {
                     <PricingCard 
                         title="Enterprise" 
                         qty="> 150 Data"
-                        price="Rp 75.000" 
+                        price="Rp 65.000" 
                         features={[
                             "Semua Fitur Pro",
                             "Unlimited Processing",
                             "Prioritas Tertinggi",
-                            "Lifetime History Akses"
+                            "Simpan History 50 Hari",
                         ]}
                     />
                 </div>

@@ -161,7 +161,6 @@ function Homepage() {
     const [desc, setDesc] = useState('');
     const [author, setAuthor] = useState('');
     const [date, setDate] = useState('');
-
     const [extraTexts, setExtraTexts] = useState([]);
     const [selectedId, setSelectedId] = useState(null);
 
@@ -285,9 +284,9 @@ function Homepage() {
     // --- LOGIC HARGA ---
         const calculatePrice = (qty) => {
         if (qty <= 30) return 0;
-        if (qty <= 100) return 30000;
-        if (qty <= 150) return 50000;
-        return 75000;
+        if (qty <= 100) return 15000;
+        if (qty <= 150) return 40000;
+        return 65000;
     };
 
     // LOGIKA WATERMARK
@@ -295,14 +294,65 @@ function Homepage() {
 
     // --- LOGIC UTAMA ---
 
+    // --- CEK DAILY QUOTA ---
+    const checkDailyQuota = (qty) => {
+        if (isAdmin) return true; 
+        if (calculatePrice(qty) > 0) return true; 
+
+        // Logic Limit Harian untuk Gratis
+        const today = new Date().toDateString(); 
+        const storageKey = 'daily_usage_log';
+        let usageData = JSON.parse(localStorage.getItem(storageKey) || '{}');
+
+        // Reset jika beda hari
+        if (usageData.date !== today) {
+            usageData = { date: today, count: 0 };
+        }
+
+        // Cek Sisa Kuota
+        if (usageData.count + qty > 30) {
+            const sisa = Math.max(0, 30 - usageData.count);
+            showModal({ 
+                title: 'Limit Harian Tercapai', 
+                message: `Kuota gratis harian Anda tersisa: ${sisa}.\nAnda meminta: ${qty}.\n\nSilakan kurangi jumlah, upgrade ke Premium, atau kembali besok.`, 
+                type: 'alert' 
+            });
+            return false;
+        }
+
+        return true;
+    };
+
+    const updateDailyQuota = (qty) => {
+        if (isAdmin || calculatePrice(qty) > 0) return;
+        const today = new Date().toDateString();
+        const storageKey = 'daily_usage_log';
+        let usageData = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        
+        if (usageData.date !== today) usageData = { date: today, count: 0 };
+        usageData.count += qty;
+        
+        localStorage.setItem(storageKey, JSON.stringify(usageData));
+    };
+
     // 1. Simpan ke Database & Local
     const saveToHistory = (count, cost, dataUsed, currentUserOverride = null) => {
+        updateDailyQuota(count);
+
         const finalUser = currentUserOverride || user;
+        
+        let planType = 'Free';
+        let retentionDays = 7;
+
+        if (cost === 15000) { planType = 'Basic'; retentionDays = 25; }
+        else if (cost === 40000) { planType = 'Pro'; retentionDays = 30; }
+        else if (cost >= 65000) { planType = 'Enterprise'; retentionDays = 50; }
+
         const activityData = {
             email: finalUser ? finalUser.email : 'Guest',
             name: finalUser ? finalUser.name : 'Guest',
             type: dataUsed.length > 1 ? 'Batch Generate' : 'Single PDF',
-            details: `Jumlah: ${count} | Biaya: ${cost}`
+            details: `Qty: ${count} | Plan: ${planType}`
         };
 
         const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -318,15 +368,20 @@ function Homepage() {
             id: uuidv4(),
             date: new Date().toISOString(),
             qty: count,
-            fileName: dataUsed.length > 1 ? "Certificates Batch" : "Single PDF",
+            fileName: `Certificates (${planType})`,
             cost: cost,
+            plan: planType,
+            retentionDays: retentionDays,
             fullData: dataUsed
         };
 
         try {
             const currentHistory = JSON.parse(localStorage.getItem(`history_${finalUser.email}`) || '[]');
             localStorage.setItem(`history_${finalUser.email}`, JSON.stringify([newEntry, ...currentHistory]));
-        } catch (e) { }
+        } catch (e) { 
+            console.error(e);
+            alert("Penyimpanan Browser Penuh. History lama mungkin tidak tersimpan.");
+        }
     };
 
     const handleCancelProcess = () => { abortRef.current = true; setIsProcessing(false); closeModal(); };
@@ -335,33 +390,25 @@ function Homepage() {
 
     // 2. HANDLE UTAMA (Validasi Data & Pembayaran)
     const handleMainAction = async () => {
-        // A. TENTUKAN SUMBER DATA
         let finalDataSource = [];
 
         if (excelData.length > 0) {
-            // Priority 1: Data dari Excel
             finalDataSource = [...excelData];
         } else if (name.trim()) {
-            // Priority 2: Data dari Manual Input (Cek Titik Koma)
-            // Logika Pemisahan Semicolon
             const namesArray = name.split(';').map(n => n.trim()).filter(n => n !== "");
             if (namesArray.length > 0) {
-                // Konversi array string menjadi array object seperti format Excel
                 finalDataSource = namesArray.map(n => ({ Name: n }));
             }
         }
 
-        // B. VALIDASI DATA KOSONG
         if (finalDataSource.length === 0) {
             showModal({ title: 'Data Kosong', message: 'Silakan isi Nama Peserta atau Upload Excel.', type: 'alert' });
             return;
         }
 
-        // C. VALIDASI JUMLAH (REQUEST VS TERSEDIA)
         const availableCount = finalDataSource.length;
         const requestedQty = generateQty > 0 ? generateQty : availableCount;
 
-        // Jika minta lebih banyak dari data yang ada -> ERROR/KONFIRMASI
         if (requestedQty > availableCount) {
             showModal({
                 type: 'confirm',
@@ -371,9 +418,7 @@ function Homepage() {
                 cancelText: 'Batal',
                 onConfirm: () => {
                     closeModal();
-                    // Paksa qty menjadi sesuai data yang ada
                     setGenerateQty(availableCount);
-                    // Lanjut ke pembayaran dengan qty yang sudah dikoreksi
                     proceedToPayment(availableCount, finalDataSource);
                 }
             });
@@ -391,6 +436,8 @@ function Homepage() {
             return;
         }
 
+        if (!checkDailyQuota(qty)) return;
+
         const price = calculatePrice(qty);
 
         // Jika Berbayar
@@ -407,7 +454,6 @@ function Homepage() {
             });
         } else {
             // Jika Gratis
-            // Jika cuma 1 data -> Single PDF
             if (qty === 1) {
                 executeSinglePDF(dataSource[0]); 
             } else {
@@ -419,9 +465,7 @@ function Homepage() {
                     confirmText: 'Mulai', 
                     onConfirm: () => { 
                         closeModal(); 
-                        
                         saveToHistory(qty, 0, dataSource); 
-                        
                         executeZip(qty, dataSource, 0); 
                     } 
                 });
