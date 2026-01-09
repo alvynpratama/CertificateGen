@@ -169,6 +169,9 @@ body {
   background: var(--bg-body); 
   display: flex;
   flex-direction: column;
+  touch-action: none;
+  user-select: none;
+  overflow: hidden;
 }
 
 /* --- CONTROL PANEL (KANAN) --- */
