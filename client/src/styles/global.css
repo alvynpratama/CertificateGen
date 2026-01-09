@@ -240,21 +240,17 @@ body {
 @keyframes slideDown { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
 @keyframes slideUpFade { from { transform: translateY(30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
 
-/* --- RESPONSIVE FIX (MOBILE - STABLE SCROLL LAYOUT) --- */
-@media screen and (max-width: 1024px) {
-  .control-panel { width: 300px; min-width: 300px; }
-}
-
+/* --- RESPONSIVE FIX (MOBILE - FINAL FIXED LAYOUT) --- */
 @media screen and (max-width: 768px) {
-  /* 1. RESET BODY AGAR BISA SCROLL */
+  /* 1. KUNCI LAYAR AGAR PAS 100% HP */
   body, html { 
-    overflow-y: auto; 
-    height: auto; 
+    overflow: hidden; 
+    height: 100%;
   }
   
   .main { 
-    height: auto; 
-    min-height: 100vh;
+    height: 100dvh; /* Dynamic Viewport Height (Anti URL bar browser) */
+    overflow: hidden;
     display: flex;
     flex-direction: column;
   }
@@ -262,95 +258,116 @@ body {
   .maincontainer { 
     flex: 1; 
     display: flex;
-    flex-direction: column; /* Susun vertikal: Canvas -> Panel -> Template */
-    overflow: visible; 
-    height: auto;
+    flex-direction: column;
+    overflow: hidden; 
+    height: 100%;
+    position: relative;
   }
 
   /* 2. HEADER */
   .header { 
-    padding: 0 16px; 
-    height: 60px;
-    flex-shrink: 0;
+    flex: 0 0 50px; /* Tinggi Header Tetap */
+    padding: 0 12px;
+    z-index: 50;
   }
+  .brand-logo { height: 22px; width: auto; }
+  .brand-text { font-size: 14px; }
 
-  /* 3. CANVAS (Urutan 1) */
+  /* 3. CANVAS / MIDDLE (35% Layar) */
   .middle { 
     order: 1; 
-    width: 100%; 
     
-    /* Tinggi Canvas = 50% Layar HP (Cukup besar untuk dilihat) */
-    height: 50vh; 
-    min-height: 300px;
+    /* Tinggi Canvas FIX 38% dari layar */
+    flex: 0 0 38vh; 
+    height: 38vh; 
+    min-height: 250px; 
     
     border-bottom: var(--glass-border); 
-    position: relative; /* Penting untuk Panning */
-    background: #111; /* Pembeda visual */
+    overflow: hidden; 
+    position: relative;
+    background: #111;
     z-index: 10;
   }
   
+  /* Kontrol Zoom di pojok canvas */
   .zoom-controls-wrapper { 
-    bottom: 10px; right: 10px; 
-    transform: scale(0.9);
+    bottom: 8px; right: 8px; 
+    transform: scale(0.8); 
+    transform-origin: bottom right;
   }
 
-  /* 4. CONTROL PANEL (Urutan 2 - Inputan) */
+  /* 4. CONTROL PANEL (Form Input - Scrollable) */
   .control-panel { 
     order: 2; 
-    width: 100%; 
-    height: auto; /* Tinggi otomatis mengikuti isi inputan */
+    
+    /* Mengisi sisa ruang kosong */
+    flex: 1; 
+    height: auto; 
+    
+    /* Scroll HANYA terjadi di area ini */
+    overflow-y: auto; 
+    -webkit-overflow-scrolling: touch;
     
     border-left: none; 
-    padding: 20px; 
-    overflow: visible; 
+    padding: 15px; 
+    
+    /* PENTING: Padding bawah besar agar input terakhir tidak tertutup Sidebar */
+    padding-bottom: 100px; 
   }
 
-  /* 5. SIDEBAR TEMPLATE (Urutan 3 - Di Bawah Inputan) */
+  /* 5. SIDEBAR TEMPLATE (Menempel di Bawah) */
   .sidebar { 
     order: 3;
     
-    /* Posisi Static (Mengalir natural di bawah Control Panel) */
-    position: relative; 
+    /* KUNCI AGAR TIDAK TENGGELAM: Absolute di bawah */
+    position: absolute; 
+    bottom: 0;
+    left: 0;
     width: 100%; 
-    height: auto; 
+    height: 85px; /* Tinggi Sidebar */
     
+    z-index: 999; /* Pastikan di atas layer input */
     display: flex;
-    flex-direction: column; /* Header Sidebar di atas, Grid di bawah */
+    align-items: center;
+    overflow-x: auto; /* Scroll samping untuk template */
+    padding: 10px; 
     
-    padding: 20px; 
-    border-top: var(--glass-border);
-    background: var(--bg-element); 
+    border-top: 1px solid var(--border-color);
+    /* Wajib ada background agar tulisan di belakangnya tidak tembus */
+    background: var(--bg-main); 
+    backdrop-filter: blur(10px);
     
-    /* Reset style desktop */
+    /* Reset properti desktop */
     opacity: 1 !important;
     transform: none !important;
-    margin-left: 0;
+    margin: 0;
   }
   
-  /* Header "Pilih Template" dimunculkan kembali agar jelas */
-  .sidebar-header { 
-    display: block; 
-    margin-bottom: 15px;
-  }
-  .sidebar-header h3 { font-size: 16px; margin: 0; }
-
-  /* Grid Template agar bisa discroll horizontal */
+  .sidebar.closed { width: 100%; padding: 10px; }
+  
+  /* Sembunyikan elemen sidebar desktop */
+  .sidebar-toggle-btn, .sidebar-header, .sidebar-title { display: none; }
+  
+  /* Grid Template Horizontal */
   .template-grid { 
     display: flex; 
-    flex-direction: row; /* Berjejer ke samping */
-    gap: 15px; 
-    width: 100%;
-    overflow-x: auto; /* Scroll samping */
-    padding-bottom: 10px;
+    flex-direction: row;
+    gap: 12px; 
+    width: max-content; 
+    padding: 0; margin: 0;
   }
   
   .template-item { 
-    width: 100px; 
-    height: 75px; 
+    width: 70px; 
+    height: 55px; 
     flex-shrink: 0; 
-    border-radius: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
   }
-
-  /* Sembunyikan tombol toggle sidebar karena sekarang selalu terlihat */
-  .sidebar-toggle-btn { display: none; }
+  
+  /* Tombol Hapus Background Kecil */
+  .btn-remove-bg {
+      width: 18px; height: 18px; font-size: 10px;
+      top: -5px; right: -5px;
+  }
 }
