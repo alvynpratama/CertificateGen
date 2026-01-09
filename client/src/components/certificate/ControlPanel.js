@@ -39,10 +39,15 @@ const useFonts = () => {
 
     useEffect(() => {
         const fetchFonts = async () => {
+            console.log("🚀 [FRONTEND] Memulai fetchFonts...");
             try {
                 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+                console.log("🔗 [FRONTEND] URL Tujuan:", `${API_URL}/fonts`);
                 const res = await fetch(`${API_URL}/fonts`);
+                console.log("📩 [FRONTEND] Status Response:", res.status);
+                if (!res.ok) throw new Error(`HTTP Error! status: ${res.status}`);
                 const data = await res.json();
+                console.log("📦 [FRONTEND] Data diterima, jumlah:", data.length);
                 if (Array.isArray(data)) {
                     setFonts(prev => {
                         const existing = new Set(prev.map(f => f.family));

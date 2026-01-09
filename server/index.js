@@ -302,11 +302,18 @@ app.post('/api/auth/reset-password', async (req, res) => {
 // 7. Endpoint Daftar Google Fonts
 let fontsCache = null;
 app.get('/api/fonts', async (req, res) => {
+    console.log("👉 [SERVER] Request masuk ke /api/fonts");
     try {
-        if (fontsCache) return res.json(fontsCache);
-
+        if (fontsCache) {
+            console.log("✅ [SERVER] Menggunakan Cache");
+            return res.json(fontsCache);
+        }
         const apiKey = process.env.GOOGLE_FONTS_API_KEY;
+        console.log("🔑 [SERVER] API Key (Depan):", apiKey ? apiKey.substring(0, 5) + "..." : "TIDAK ADA!");
+
         const response = await axios.get(`https://www.googleapis.com/webfonts/v1/webfonts?key=${apiKey}&sort=popularity`);
+        console.log("ww [SERVER] Menghubungi Google...");
+        console.log("✅ [SERVER] Google merespon. Jumlah font:", response.data.items.length);
         
         const allFonts = response.data.items.map(font => ({
             family: font.family,
