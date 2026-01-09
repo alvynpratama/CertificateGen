@@ -240,40 +240,73 @@ body {
 @keyframes slideDown { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
 @keyframes slideUpFade { from { transform: translateY(30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
 
-/* --- RESPONSIVE FIX (MOBILE) --- */
+/* --- RESPONSIVE FIX (MOBILE - COMPACT VERSION) --- */
 @media screen and (max-width: 1024px) {
   .control-panel { width: 300px; min-width: 300px; }
 }
 
 @media screen and (max-width: 768px) {
   body { overflow: auto; }
-  .main { height: auto; min-height: 100vh; }
+  
+  .main { 
+    height: auto; 
+    min-height: 100vh; 
+    display: flex;
+    flex-direction: column;
+  }
+
   .maincontainer { 
     flex-direction: column; 
     overflow: visible; 
     height: auto;
+    flex: 1; /* Agar mengisi sisa ruang */
   }
 
+  /* 1. HEADER LEBIH PENDEK */
+  .header { 
+    padding: 0 10px; 
+    height: 45px; /* Tinggi header dikecilkan */
+    border-bottom: var(--glass-border);
+  }
+  .brand-logo { height: 20px; width: auto; } /* Logo lebih kecil */
+  .brand-text { font-size: 13px; margin-left: 8px; } /* Teks lebih kecil */
+  .header-actions .btn-icon { transform: scale(0.85); } /* Icon tombol kecil */
+  .header-actions .btn-primary { 
+    padding: 4px 12px; 
+    font-size: 11px; 
+    height: 28px;
+  }
+
+  /* 2. AREA CANVAS (MIDDLE) */
   .middle { 
     order: 1; 
     width: 100%; 
-    height: 40vh; 
-    min-height: 300px;
-    overflow: hidden;
+    height: 35vh; /* Dikurangi jadi 35% agar bawah lebih lega */
+    min-height: 250px; 
     border-bottom: var(--glass-border); 
+    overflow: hidden; 
     position: relative;
   }
-  .zoom-controls-wrapper { bottom: 10px; padding: 4px 12px; }
+  
+  .zoom-controls-wrapper { 
+    bottom: 8px; 
+    padding: 2px 8px; 
+    transform: scale(0.9); 
+    transform-origin: bottom center;
+  }
 
+  /* 3. CONTROL PANEL (Form Input) */
   .control-panel { 
     order: 2; 
-    width: 100%; height: auto; 
+    width: 100%; 
+    height: auto; 
     border-left: none; 
-    padding-bottom: 30px;
+    padding: 15px; 
+    padding-bottom: 20px;
     overflow-y: visible; 
   }
 
-  /* 3. SIDEBAR TEMPLATE (MOBILE: BOTTOM HORIZONTAL) */
+  /* 4. SIDEBAR TEMPLATE (BOTTOM - SUPER COMPACT) */
   .sidebar { 
     order: 3;
     width: 100%; 
@@ -281,39 +314,52 @@ body {
     height: auto; 
     flex-direction: row;
     overflow-x: auto;
-    padding: 16px; 
+    
+    /* Padding diperkecil drastis */
+    padding: 8px 12px; 
+    
     border-right: none; 
     border-top: var(--glass-border);
     margin-left: 0;
     opacity: 1;
+    background: var(--bg-element); /* Pastikan ada background */
   }
   
   .sidebar.closed { 
     width: 100%; 
     min-width: 100%; 
     opacity: 1; 
-    padding: 16px;
+    padding: 8px 12px;
   }
 
+  /* Sembunyikan elemen sidebar yang tidak perlu */
   .sidebar-toggle-btn { display: none; }
   .sidebar-header, .sidebar-title { display: none; }
   
-  .sidebar-content { flex-direction: row; width: 100%; gap: 15px; }
+  .sidebar-content { 
+    flex-direction: row; 
+    width: 100%; 
+    gap: 8px; 
+    align-items: center;
+  }
   
   .template-grid { 
     display: flex; 
-    gap: 10px; 
+    gap: 8px; 
     width: max-content; 
     padding-bottom: 0; 
+    margin: 0;
   }
   
+  /* Ukuran Thumbnail Template Diperkecil */
   .template-item { 
-    width: 80px; 
-    height: 60px; 
+    width: 60px; /* Lebih kecil */
+    height: 45px; /* Lebih pendek */
     flex-shrink: 0; 
     aspect-ratio: auto;
+    border-radius: 4px;
   }
-  
-  .header { padding: 0 16px; height: 60px; }
-  .brand-text { font-size: 15px; }
+
+  .upload-placeholder svg { width: 16px; height: 16px; }
+  .upload-placeholder span { font-size: 9px; }
 }
