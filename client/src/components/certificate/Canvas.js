@@ -11,7 +11,7 @@ const ComponentToPrint = ({
     showQR, qrValue, qrColor, 
     imageStyles, handleImageStyleChange,
     qrStyle, handleQrStyleChange,
-    zoom 
+    zoom, showWatermark, watermarkImg
 }) => {
     
     const itemsRef = useRef({});
@@ -174,6 +174,31 @@ const ComponentToPrint = ({
             }}
             onClick={() => { if(isPreview && setSelectedId) setSelectedId(null); }}
         >
+            {showWatermark && watermarkImg && (
+                <div style={{
+                    position: 'absolute',
+                    bottom: '30px', 
+                    right: '30px',
+
+                    zIndex: 50, 
+
+                    opacity: 0.35, 
+
+                    pointerEvents: 'none',
+                    width: '150px',
+                    height: 'auto',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }}>
+                    <img 
+                        src={watermarkImg} 
+                        alt="Watermark" 
+                        style={{ width: '100%', height: 'auto' }} 
+                    />
+                </div>
+            )}
+
             {renderText('heading', heading, styles.heading)}
             {renderText('name', name, styles.name)}
             {renderText('desc', desc, styles.desc)}
