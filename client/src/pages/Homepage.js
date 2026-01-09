@@ -162,20 +162,20 @@ function Homepage() {
     const handleZoomOut = () => setZoom(p => Math.max(p - 0.05, 0.1));
 
     // --- LOGIC PANNING ---
-    const handlePointerDown = (e) => {
-        const targetId = e.target.id;
-        const isElement = ['heading', 'name', 'desc', 'author', 'date', 'qr', 'logo', 'signature'].includes(targetId) 
-                          || targetId.startsWith('extra-');
+    const handlePointerDown = (e) => { 
+        const target = e.target;
+        const targetId = target.id;
 
-        const isControl = e.target.closest('.moveable-control-box') 
-                          || e.target.closest('.moveable-line') 
-                          || e.target.closest('.moveable-area');
-
-        if (isElement || isControl) {
-            return;
-        }
+        const isElementID = ['heading', 'name', 'desc', 'author', 'date', 'qr', 'logo', 'signature'].includes(targetId) 
+                            || (targetId && targetId.startsWith('extra-'));
         
-        if (e.pointerType === 'touch' && !isPanMode) return; 
+        const isControl = target.closest('.moveable-control-box') 
+                          || target.closest('.moveable-line') 
+                          || target.closest('.moveable-area');
+
+        if (isElementID || isControl) {
+            return; 
+        }
 
         setIsPanning(true);
         lastPosRef.current = { x: e.clientX, y: e.clientY };
