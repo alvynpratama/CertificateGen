@@ -7,6 +7,7 @@ import { saveAs } from 'file-saver';
 import { v4 as uuidv4 } from 'uuid';
 import '../styles/global.css';
 import { useNavigate } from 'react-router-dom';
+import AppLogo from '../../assets/templates/logo.png';
 
 import { createTransaction, loadSnapScript } from '../services/midtransService';
 
@@ -281,13 +282,22 @@ function Homepage() {
     const confirmRemoveLogo = () => { setLogo(null); };
     const confirmRemoveSig = () => { setSignatureImg(null); };
 
+    // --- LOGIC HARGA ---
+        const calculatePrice = (qty) => {
+        if (qty <= 30) return 0;
+        if (qty <= 100) return 30000;
+        if (qty <= 150) return 50000;
+        return 75000;
+    };
+
+    // LOGIKA WATERMARK
+    const isWatermarkActive = !isAdmin && calculatePrice(generateQty) === 0;
+
     // --- LOGIC UTAMA ---
 
     // 1. Simpan ke Database & Local
     const saveToHistory = (count, cost, dataUsed, currentUserOverride = null) => {
-
         const finalUser = currentUserOverride || user;
-
         const activityData = {
             email: finalUser ? finalUser.email : 'Guest',
             name: finalUser ? finalUser.name : 'Guest',
@@ -323,15 +333,7 @@ function Homepage() {
     const handleHistoryReDownload = (item) => { setShowHistory(false); executeZip(item.qty, item.fullData); };
     const resetAllInputs = () => { setExcelData([]); setGenerateQty(0); setCurrentIndex(0); setName(''); setHeading(''); setDesc(''); setAuthor(''); setDate(''); setQrContent(''); setExtraTexts([]); };
 
-    // 2. Hitung Harga
-    const calculatePrice = (qty) => {
-        if (qty <= 30) return 0;
-        if (qty <= 100) return 30000;
-        if (qty <= 150) return 50000;
-        return 75000;
-    };
-
-    // 3. HANDLE UTAMA (Validasi Data & Pembayaran)
+    // 2. HANDLE UTAMA (Validasi Data & Pembayaran)
     const handleMainAction = async () => {
         // A. TENTUKAN SUMBER DATA
         let finalDataSource = [];
@@ -644,6 +646,8 @@ function Homepage() {
                         logo={logo} customBackground={activeCustomBg} signatureImg={signatureImg}
                         showQR={showQR} qrValue={finalQrValue} qrColor={qrColor} imageStyles={imageStyles}
                         qrStyle={qrStyle} zoom={1}
+                        showWatermark={isWatermarkActive} 
+                        watermarkImg={AppLogo}
                     />
                 </div>
             </div>
