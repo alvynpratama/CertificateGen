@@ -163,8 +163,20 @@ function Homepage() {
 
     // --- LOGIC PANNING ---
     const handlePointerDown = (e) => {
-        if (e.target.closest('.moveable-control-box') || e.target.closest('.moveable-line')) return;
+        const targetId = e.target.id;
+        const isElement = ['heading', 'name', 'desc', 'author', 'date', 'qr', 'logo', 'signature'].includes(targetId) 
+                          || targetId.startsWith('extra-');
+
+        const isControl = e.target.closest('.moveable-control-box') 
+                          || e.target.closest('.moveable-line') 
+                          || e.target.closest('.moveable-area');
+
+        if (isElement || isControl) {
+            return;
+        }
         
+        if (e.pointerType === 'touch' && !isPanMode) return; 
+
         setIsPanning(true);
         lastPosRef.current = { x: e.clientX, y: e.clientY };
     };
