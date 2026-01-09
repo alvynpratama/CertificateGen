@@ -4,6 +4,7 @@ const cors = require('cors');
 const midtransClient = require('midtrans-client');
 const sql = require('mssql');
 const bcrypt = require('bcryptjs'); 
+const axios = require('axios');
 
 const app = express();
 
@@ -296,6 +297,29 @@ app.post('/api/auth/reset-password', async (req, res) => {
 
         res.json({ status: 'success', message: 'Password berhasil diubah' });
     } catch (err) { res.status(500).json({ status: 'error', message: err.message }); }
+});
+
+// 7. Endpoint Daftar Google Fonts
+let fontsCache = null;
+app.get('/api/fonts', async (req, res) => {
+    try {
+        if (fontsCache) return res.json(fontsCache);
+
+        const apiKey = process.env.GOOGLE_FONTS_API_KEY;
+        const response = await axios.get(`https://www.googleapis.com/webfonts/v1/webfonts?key=${apiKey}&sort=popularity`);
+        
+        const topFonts = response.data.items.slice(0, 100).map(font => ({
+            family: font.family,
+            category: font.category,
+            variants: font.variants
+        }));
+
+        fontsCache = topFonts;
+        res.json(topFonts);
+    } catch (error) {
+        console.error("Gagal ambil font:", error.message);
+        res.status(500).json({ message: "Gagal memuat font" });
+    }
 });
 
 // --- ADMIN DASHBOARD ENDPOINTS (STATS) ---

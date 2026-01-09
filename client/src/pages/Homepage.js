@@ -608,9 +608,8 @@ function Homepage() {
 
                     setName(pName); 
                     setGeneratedID(pID);
-                    
-                    // Tunggu DOM Update
-                    await new Promise(r => setTimeout(r, 500)); // Naikkan ke 500ms untuk safety
+                    await document.fonts.ready;
+                    await new Promise(r => setTimeout(r, 800));
 
                     // Cek apakah elemen ada sebelum capture
                     if(!el) throw new Error("Print Area Element not found in DOM");
@@ -618,7 +617,7 @@ function Homepage() {
                     const canvas = await html2canvas(el, { 
                         scale: 1.5, 
                         useCORS: true,
-                        logging: false // Matikan log internal html2canvas agar console bersih
+                        logging: false
                     });
 
                     const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
@@ -627,14 +626,12 @@ function Homepage() {
 
                 } catch (innerError) {
                     console.error(`❌ Error on item ${i+1}:`, innerError);
-                    // Lanjut ke item berikutnya meski error
                 }
             }
 
             console.log("📦 Zipping files...");
             
             if (!abortRef.current) {
-                // Pastikan file zip tidak kosong
                 if (Object.keys(zip.files).length === 0) {
                     throw new Error("No files were generated successfully.");
                 }
@@ -651,7 +648,6 @@ function Homepage() {
         } catch (e) { 
             console.error("❌ FATAL ERROR in executeZip:", e);
             setIsProcessing(false); 
-            // Jangan closeModal() otomatis biar user bisa baca error
             showModal({ title: 'Error', message: 'Terjadi kesalahan: ' + e.message, type: 'alert' });
         }
         
