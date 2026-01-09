@@ -559,7 +559,7 @@ function Homepage() {
     const executeZip = async (qty, dataSource, cost = 0) => {
         const el = document.getElementById('print-area');
         if (!dataSource || dataSource.length === 0) {
-            console.error("❌ ExecuteZip aborted: No DataSource");
+            console.error("ExecuteZip aborted: No DataSource");
             return;
         }
 
@@ -569,23 +569,21 @@ function Homepage() {
         const zip = new JSZip();
 
         try {
-            console.log(`🔄 Loop started for ${qty} items`);
+            console.log(`Loop started for ${qty} items`);
 
             for (let i = 0; i < qty; i++) {
                 // 1. Cek Abort
                 if (abortRef.current) {
-                    console.warn("⏹️ Process Aborted by User");
+                    console.warn("Process Aborted by User");
                     break;
                 }
 
                 // 2. Cek Data Existence
                 const person = dataSource[i];
                 if (!person) {
-                    console.error(`❌ Data missing at index ${i}`);
+                    console.error(`Data missing at index ${i}`);
                     continue; // Skip if data corrupt, don't break
                 }
-
-                console.log(`📄 Processing ${i+1}/${qty}: ${person.Name || person.nama}`);
 
                 // Update Progress Modal
                 showModal({ 
@@ -625,11 +623,9 @@ function Homepage() {
                     zip.file(`${pName}_${pID}.pdf`, pdf.output('blob'));
 
                 } catch (innerError) {
-                    console.error(`❌ Error on item ${i+1}:`, innerError);
+                    console.error(`Error on item ${i+1}:`, innerError);
                 }
             }
-
-            console.log("📦 Zipping files...");
             
             if (!abortRef.current) {
                 if (Object.keys(zip.files).length === 0) {
@@ -642,11 +638,9 @@ function Homepage() {
                 const content = await zip.generateAsync({ type: 'blob' });
                 saveAs(content, 'Certificates.zip');
                 
-                console.log("✅ Download Triggered");
                 showModal({ title: 'Selesai', message: 'Download berhasil dimulai!', type: 'alert', confirmText: 'OK', onConfirm: () => { closeModal(); resetAllInputs(); } });
             }
         } catch (e) { 
-            console.error("❌ FATAL ERROR in executeZip:", e);
             setIsProcessing(false); 
             showModal({ title: 'Error', message: 'Terjadi kesalahan: ' + e.message, type: 'alert' });
         }
