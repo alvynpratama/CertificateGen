@@ -308,14 +308,13 @@ app.get('/api/fonts', async (req, res) => {
         const apiKey = process.env.GOOGLE_FONTS_API_KEY;
         const response = await axios.get(`https://www.googleapis.com/webfonts/v1/webfonts?key=${apiKey}&sort=popularity`);
         
-        const topFonts = response.data.items.slice(0, 100).map(font => ({
+        const allFonts = response.data.items.map(font => ({
             family: font.family,
-            category: font.category,
-            variants: font.variants
+            category: font.category
         }));
 
-        fontsCache = topFonts;
-        res.json(topFonts);
+        fontsCache = allFonts;
+        res.json(allFonts);
     } catch (error) {
         console.error("Gagal ambil font:", error.message);
         res.status(500).json({ message: "Gagal memuat font" });

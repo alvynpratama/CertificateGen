@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { loadWebFont } from '../../utils/fontLoader';
 
-// --- IKON SVG ---
+// --- IKON SVG (Sama) ---
 const BoldIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path></svg>;
 const ItalicIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="4" x2="10" y2="4"></line><line x1="14" y1="20" x2="5" y2="20"></line><line x1="15" y1="4" x2="9" y2="20"></line></svg>;
 const UploadIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>;
@@ -30,6 +30,7 @@ const ModernNumberInput = ({ value, onChange, min = 0 }) => {
     );
 };
 
+// --- CUSTOM HOOK ---
 const useFonts = () => {
     const [fonts, setFonts] = useState([
         { family: 'Montserrat' }, { family: 'Cinzel' }, { family: 'Pinyon Script' },
@@ -58,15 +59,14 @@ const useFonts = () => {
 };
 
 // --- SEARCHABLE FONT DROPDOWN ---
-const FontDropdown = ({ value, onChange, fonts }) => {
+const FontDropdown = ({ value, onChange, fonts, theme }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
     const wrapperRef = useRef(null);
 
-    // Filter Fonts
-    const filtered = fonts.filter(f => f.family.toLowerCase().includes(search.toLowerCase()));
+    // Filter Fonts (Max 50 result agar tidak lag saat render)
+    const filtered = fonts.filter(f => f.family.toLowerCase().includes(search.toLowerCase())).slice(0, 50);
 
-    // Klik luar tutup dropdown
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -80,13 +80,12 @@ const FontDropdown = ({ value, onChange, fonts }) => {
     const handleSelect = (fontFamily) => {
         loadWebFont(fontFamily);
         onChange(fontFamily);
-        setSearch(''); // Reset search tapi jangan ubah value tampilan
+        setSearch(''); 
         setIsOpen(false);
     };
 
     return (
         <div className="font-dropdown-wrapper" ref={wrapperRef} style={{position:'relative', flex:1}}>
-            {/* INPUT TRIGGER */}
             <div 
                 className="font-dropdown-trigger" 
                 onClick={() => setIsOpen(!isOpen)}
@@ -103,24 +102,26 @@ const FontDropdown = ({ value, onChange, fonts }) => {
                 <ChevronDown />
             </div>
 
-            {/* DROPDOWN LIST */}
             {isOpen && (
                 <div style={{
-                    position:'absolute', top:'100%', left:0, right:0, zIndex:100,
-                    background:'var(--bg-element)', border:'1px solid var(--border-color)',
-                    borderRadius:'6px', marginTop:'5px', boxShadow:'0 4px 15px rgba(0,0,0,0.3)',
+                    position:'absolute', top:'100%', left:0, right:0, zIndex:1000,
+                    backgroundColor: theme === 'dark' ? '#252525' : '#ffffff', 
+                    border: '1px solid var(--border-color)',
+                    borderRadius:'6px', marginTop:'5px', 
+                    boxShadow: '0 5px 20px rgba(0,0,0,0.5)',
                     maxHeight:'250px', overflowY:'auto', display:'flex', flexDirection:'column'
                 }}>
                     <input 
                         type="text" 
-                        placeholder="Cari font..." 
+                        placeholder="Cari dari 1000+ font..." 
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         autoFocus
                         style={{
-                            margin:'8px', padding:'8px', background:'rgba(255,255,255,0.05)',
+                            margin:'8px', padding:'8px', 
+                            background: theme === 'dark' ? 'rgba(255,255,255,0.1)' : '#f3f4f6',
                             border:'1px solid var(--border-color)', borderRadius:'4px',
-                            color:'var(--text-main)', fontSize:'12px'
+                            color:'var(--text-main)', fontSize:'12px', outline:'none'
                         }}
                         onClick={(e) => e.stopPropagation()} 
                     />
@@ -130,19 +131,20 @@ const FontDropdown = ({ value, onChange, fonts }) => {
                             key={i}
                             onClick={() => handleSelect(f.family)}
                             style={{
-                                padding:'8px 12px', cursor:'pointer', fontSize:'14px',
-                                fontFamily: f.family, color: value === f.family ? 'var(--primary)' : 'var(--text-main)',
-                                background: value === f.family ? 'rgba(255,255,255,0.05)' : 'transparent',
+                                padding:'10px 12px', cursor:'pointer', fontSize:'14px',
+                                fontFamily: f.family, 
+                                color: value === f.family ? 'var(--primary)' : 'var(--text-main)',
+                                background: value === f.family ? (theme === 'dark' ? 'rgba(255,255,255,0.1)' : '#eee') : 'transparent',
                                 borderBottom: '1px solid rgba(255,255,255,0.02)'
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                            onMouseLeave={(e) => e.currentTarget.style.background = value === f.family ? 'rgba(255,255,255,0.05)' : 'transparent'}
+                            onMouseEnter={(e) => e.currentTarget.style.background = theme === 'dark' ? 'rgba(255,255,255,0.1)' : '#f0f0f0'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = value === f.family ? (theme === 'dark' ? 'rgba(255,255,255,0.1)' : '#eee') : 'transparent'}
                         >
                             {f.family}
                         </div>
                     )) : (
                         <div style={{padding:'10px', textAlign:'center', fontSize:'12px', color:'var(--text-muted)'}}>
-                            Tidak ditemukan
+                            Font "{search}" tidak ditemukan.
                         </div>
                     )}
                 </div>
@@ -151,8 +153,8 @@ const FontDropdown = ({ value, onChange, fonts }) => {
     );
 };
 
-// --- TOOLBAR ---
-const StyleToolbar = ({ fieldKey, styleData, handleStyleChange, fonts }) => {
+// --- TOOLBAR (UPDATED) ---
+const StyleToolbar = ({ fieldKey, styleData, handleStyleChange, fonts, theme }) => { 
     const style = styleData || {};
     const externalFontSize = style.fontSize ? Math.round(parseFloat(style.fontSize)) : 12;
     const [inputValue, setInputValue] = useState(externalFontSize);
@@ -166,7 +168,6 @@ const StyleToolbar = ({ fieldKey, styleData, handleStyleChange, fonts }) => {
 
     return (
         <div className="style-toolbar" onClick={(e) => e.stopPropagation()}>
-            {/* ROW 1: FONT FAMILY & COLOR */}
             <div className="toolbar-row" style={{marginBottom:'8px'}}>
                 
                 {/* SEARCHABLE FONT SELECTOR */}
@@ -174,6 +175,7 @@ const StyleToolbar = ({ fieldKey, styleData, handleStyleChange, fonts }) => {
                     value={style.fontFamily || 'Montserrat'} 
                     onChange={(val) => handleStyleChange(fieldKey, 'fontFamily', val)}
                     fonts={fonts} 
+                    theme={theme}
                 />
 
                 <div style={{ position: 'relative', width: '36px', height: '36px', borderRadius: '6px', border: '1px solid var(--text-muted)', overflow: 'hidden', background: style.color || '#000000', flexShrink: 0 }}>
@@ -181,7 +183,6 @@ const StyleToolbar = ({ fieldKey, styleData, handleStyleChange, fonts }) => {
                 </div>
             </div>
 
-            {/* ROW 2: SIZE & STYLE */}
             <div className="toolbar-row" style={{justifyContent: 'space-between'}}>
                 <div style={{display:'flex', flexDirection:'column', gap:'2px'}}>
                     <span style={{fontSize:'9px', color:'var(--text-muted)'}}>Ukuran</span>
@@ -225,7 +226,7 @@ const ControlPanel = (props) => {
         return (
             <div className="input-group" key={id}>
                 <input type="text" className="input-field" placeholder={placeholder} value={value} onChange={(e) => updateTextContent(id, e.target.value)} onFocus={() => handleFocus(id)} />
-                {selectedId === id && <StyleToolbar fieldKey={id} styleData={currentStyle} handleStyleChange={handleStyleChange} fonts={availableFonts} />}
+                {selectedId === id && <StyleToolbar fieldKey={id} styleData={currentStyle} handleStyleChange={handleStyleChange} fonts={availableFonts} theme={theme} />}
             </div>
         );
     };
@@ -259,26 +260,24 @@ const ControlPanel = (props) => {
                 <span className="panel-label">KONTEN SERTIFIKAT</span>
                 {renderInput('heading', 'Judul Sertifikat', heading)}
                 
-                {/* INPUT NAMA DENGAN NOTES */}
                 <div className="input-group">
                     <input type="text" className="input-field" placeholder="Nama Peserta" value={name} onChange={(e) => updateTextContent('name', e.target.value)} onFocus={() => handleFocus('name')} />
                     <div style={{fontSize:'10px', color:'var(--text-muted)', marginTop:'2px', marginLeft:'2px'}}>Gunakan tanda titik koma (;) untuk banyak nama</div>
-                    {selectedId === 'name' && <StyleToolbar fieldKey="name" styleData={getTextStyle('name')} handleStyleChange={handleStyleChange} fonts={availableFonts} />}
+                    {selectedId === 'name' && <StyleToolbar fieldKey="name" styleData={getTextStyle('name')} handleStyleChange={handleStyleChange} fonts={availableFonts} theme={theme} />}
                 </div>
 
                 <div className="input-group">
                     <textarea className="input-field" rows="3" placeholder="Deskripsi..." value={desc} onChange={(e) => updateTextContent('desc', e.target.value)} onFocus={() => handleFocus('desc')} style={{resize:'none'}} />
-                    {selectedId === 'desc' && <StyleToolbar fieldKey="desc" styleData={getTextStyle('desc')} handleStyleChange={handleStyleChange} fonts={availableFonts} />}
+                    {selectedId === 'desc' && <StyleToolbar fieldKey="desc" styleData={getTextStyle('desc')} handleStyleChange={handleStyleChange} fonts={availableFonts} theme={theme} />}
                 </div>
 
-                {/* EXTRA TEXTS */}
                 {extraTexts && extraTexts.map((t, idx) => (
                     <div key={t.id} style={{marginBottom:'10px'}}>
                         <div style={{display:'flex', gap:'5px'}}>
                             <input type="text" className="input-field" placeholder={`Teks Tambahan ${idx + 1}`} value={t.text} onChange={(e) => updateTextContent(t.id, e.target.value)} onFocus={() => handleFocus(t.id)} />
                             <button onClick={() => handleDeleteText(t.id)} className="btn-danger" style={{width:'36px', padding:0, display:'flex', alignItems:'center', justifyContent:'center'}}><TrashIcon/></button>
                         </div>
-                        {selectedId === t.id && <StyleToolbar fieldKey={t.id} styleData={getTextStyle(t.id)} handleStyleChange={handleStyleChange} fonts={availableFonts} />}
+                        {selectedId === t.id && <StyleToolbar fieldKey={t.id} styleData={getTextStyle(t.id)} handleStyleChange={handleStyleChange} fonts={availableFonts} theme={theme} />}
                     </div>
                 ))}
 
@@ -286,7 +285,7 @@ const ControlPanel = (props) => {
                 {renderInput('author', 'Penandatangan', author)}
                 <div className="input-group">
                     <input type="date" className="input-field" value={date} onChange={(e) => updateTextContent('date', e.target.value)} onFocus={() => handleFocus('date')} />
-                    {selectedId === 'date' && <StyleToolbar fieldKey="date" styleData={getTextStyle('date')} handleStyleChange={handleStyleChange} fonts={availableFonts} />}
+                    {selectedId === 'date' && <StyleToolbar fieldKey="date" styleData={getTextStyle('date')} handleStyleChange={handleStyleChange} fonts={availableFonts} theme={theme} />}
                 </div>
             </div>
 
