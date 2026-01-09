@@ -240,113 +240,118 @@ body {
 @keyframes slideDown { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
 @keyframes slideUpFade { from { transform: translateY(30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
 
-/* --- RESPONSIVE FIX (MOBILE - ULTRA COMPACT) --- */
+/* --- RESPONSIVE FIX (MOBILE - ONE PAGE VIEW) --- */
 @media screen and (max-width: 1024px) {
   .control-panel { width: 300px; min-width: 300px; }
 }
 
 @media screen and (max-width: 768px) {
-  body { overflow: auto; }
+  /* 1. KUNCI LAYAR AGAR TIDAK SCROLL PAGE */
+  body, html { 
+    overflow: hidden; /* Matikan scroll browser utama */
+    height: 100%;     /* Paksa tinggi 100% layar */
+  }
   
   .main { 
-    height: auto; 
-    min-height: 100vh; 
+    height: 100vh; /* Tinggi fix sesuai layar HP */
+    overflow: hidden;
     display: flex;
     flex-direction: column;
   }
 
   .maincontainer { 
-    flex-direction: column; 
-    overflow: visible; 
-    height: auto;
-    flex: 1; 
+    flex: 1; /* Mengisi sisa ruang di bawah header */
+    display: flex;
+    flex-direction: column; /* Susun Vertikal */
+    overflow: hidden; 
+    height: 100%;
+    position: relative;
   }
 
-  /* 1. HEADER SUPER TIPIS */
+  /* 2. HEADER (UKURAN NORMAL/NYAMAN) */
   .header { 
-    padding: 0 8px; 
-    height: 40px; /* Sangat pendek */
-    border-bottom: var(--glass-border);
-    justify-content: space-between;
+    flex: 0 0 auto; /* Tidak boleh menyusut */
+    height: 60px;   /* Tinggi nyaman */
+    padding: 0 16px;
+    z-index: 50;
   }
-  .brand-logo { height: 18px; width: auto; }
-  .brand-text { display: none; } /* Hilangkan Teks Brand agar hemat tempat */
-  
-  .header-actions { gap: 8px; }
-  .header-actions .btn-icon { transform: scale(0.8); width: 28px; height: 28px; }
-  .header-actions .btn-primary { 
-    padding: 0 10px; 
-    font-size: 10px; 
-    height: 24px; /* Tombol Login kecil */
-  }
+  .brand-text { font-size: 16px; } /* Kembalikan ukuran font */
 
-  /* 2. AREA CANVAS (MIDDLE) */
+  /* 3. CANVAS (DIPERKECIL AGAR MUAT) */
   .middle { 
     order: 1; 
+    flex: 0 0 auto; /* Tidak boleh melar otomatis */
     width: 100%; 
-    height: 35vh; /* 35% Layar */
-    min-height: 220px; /* Batas minimal agar tidak terlalu gepeng */
+    
+    /* --- INI KUNCINYA --- */
+    height: 35vh; /* Canvas hanya mengambil 35% tinggi layar */
+    min-height: 250px; /* Batas minimal agar tidak terlalu gepeng */
+    
     border-bottom: var(--glass-border); 
     overflow: hidden; 
     position: relative;
+    background: #111; /* Pembeda visual area canvas */
   }
   
   .zoom-controls-wrapper { 
-    bottom: 5px; 
-    padding: 2px 6px; 
-    transform: scale(0.8); /* Zoom control diperkecil */
-    transform-origin: bottom center;
+    bottom: 10px; 
+    right: 10px; 
+    transform: scale(0.9);
   }
 
-  /* 3. CONTROL PANEL */
+  /* 4. CONTROL PANEL (FORM INPUT) - SCROLLABLE */
   .control-panel { 
     order: 2; 
+    flex: 1; /* MENGAMBIL SISA RUANG KOSONG */
     width: 100%; 
-    height: auto; 
     border-left: none; 
-    padding: 12px; 
-    padding-bottom: 20px;
-    overflow-y: visible; 
+    
+    /* Agar form input bisa discroll jika panjang, tapi tidak menggeser canvas/header */
+    overflow-y: auto; 
+    
+    padding: 15px; 
+    padding-bottom: 100px; /* Beri ruang kosong di bawah agar tidak tertutup Sidebar */
   }
-  /* Perkecil input field di HP */
-  .input-field { height: 32px; font-size: 12px; }
-  .panel-label { font-size: 9px; margin-bottom: 6px; }
 
-  /* 4. SIDEBAR TEMPLATE (BOTTOM - ULTRA MINI) */
+  /* 5. SIDEBAR TEMPLATE (FIXED DI BAWAH) */
   .sidebar { 
-    order: 3;
+    /* Gunakan absolute/fixed agar selalu terlihat di paling bawah */
+    position: absolute; 
+    bottom: 0;
+    left: 0;
     width: 100%; 
-    min-width: 100%;
-    height: auto; 
-    flex-direction: row;
-    overflow-x: auto;
+    height: 85px; /* Tinggi fix Sidebar */
     
-    /* Padding sangat tipis */
-    padding: 6px 8px; 
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    overflow-x: auto; /* Bisa geser kanan-kiri pilih template */
+    padding: 10px; 
     
-    border-right: none; 
     border-top: var(--glass-border);
-    margin-left: 0;
-    opacity: 1;
-    background: var(--bg-element); 
+    background: var(--bg-main); /* Pastikan background tidak transparan */
+    backdrop-filter: blur(20px);
   }
   
-  .sidebar.closed { width: 100%; min-width: 100%; opacity: 1; padding: 6px 8px; }
-  .sidebar-toggle-btn { display: none; }
-  .sidebar-header, .sidebar-title { display: none; }
-  
-  .sidebar-content { flex-direction: row; width: 100%; gap: 6px; align-items: center; }
-  .template-grid { display: flex; gap: 6px; width: max-content; padding-bottom: 0; margin: 0; }
-  
-  /* Ukuran Thumbnail Template SANGAT KECIL */
-  .template-item { 
-    width: 50px; 
-    height: 35px; /* Strip bawah jadi sangat tipis */
-    flex-shrink: 0; 
-    border-radius: 3px;
+  .sidebar.closed { 
+    width: 100%; opacity: 1; padding: 10px;
   }
 
-  /* Sembunyikan teks 'Upload' agar muat di kotak kecil */
-  .upload-placeholder span { display: none; }
-  .upload-placeholder svg { width: 14px; height: 14px; }
+  /* Elemen Sidebar Internal */
+  .sidebar-toggle-btn, .sidebar-header, .sidebar-title { display: none; }
+  
+  .template-grid { 
+    display: flex; 
+    gap: 12px; 
+    width: max-content; 
+    padding: 0; margin: 0;
+  }
+  
+  /* Ukuran Thumbnail Template (Cukup Besar) */
+  .template-item { 
+    width: 80px; 
+    height: 60px; 
+    flex-shrink: 0; 
+    border-radius: 6px;
+  }
 }
