@@ -7,7 +7,7 @@ import { saveAs } from 'file-saver';
 import { v4 as uuidv4 } from 'uuid';
 import '../styles/global.css';
 import { useNavigate } from 'react-router-dom';
-import AppLogo from '../../assets/templates/logo.png';
+import AppLogo from '../assets/templates/logo.png';
 
 import { createTransaction, loadSnapScript } from '../services/midtransService';
 
