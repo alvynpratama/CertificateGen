@@ -240,21 +240,21 @@ body {
 @keyframes slideDown { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
 @keyframes slideUpFade { from { transform: translateY(30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
 
-/* --- RESPONSIVE FIX (MOBILE - SAFE LAYOUT) --- */
+/* --- RESPONSIVE FIX (MOBILE - STABLE SCROLL LAYOUT) --- */
 @media screen and (max-width: 1024px) {
   .control-panel { width: 300px; min-width: 300px; }
 }
 
 @media screen and (max-width: 768px) {
-  /* 1. GUNAKAN 'dvh' AGAR PAS DENGAN LAYAR HP ASLI */
+  /* 1. RESET BODY AGAR BISA SCROLL */
   body, html { 
-    overflow: hidden; 
-    height: 100dvh; /* Dynamic Viewport Height (Anti URL Bar issue) */
+    overflow-y: auto; 
+    height: auto; 
   }
   
   .main { 
-    height: 100dvh; 
-    overflow: hidden;
+    height: auto; 
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
   }
@@ -262,95 +262,95 @@ body {
   .maincontainer { 
     flex: 1; 
     display: flex;
-    flex-direction: column; /* Tumpuk ke bawah */
-    overflow: hidden; 
-    height: 100%;
-    position: relative;
+    flex-direction: column; /* Susun vertikal: Canvas -> Panel -> Template */
+    overflow: visible; 
+    height: auto;
   }
 
-  /* 2. HEADER (Fixed Height) */
+  /* 2. HEADER */
   .header { 
-    flex: 0 0 50px; /* Tinggi Tetap */
-    padding: 0 10px;
-    z-index: 50;
+    padding: 0 16px; 
+    height: 60px;
+    flex-shrink: 0;
   }
-  .brand-logo { height: 24px; width: auto; }
-  .brand-text { font-size: 14px; }
 
-  /* 3. CANVAS / MIDDLE (Fixed Ratio) */
+  /* 3. CANVAS (Urutan 1) */
   .middle { 
     order: 1; 
+    width: 100%; 
     
-    /* Gunakan flex-basis untuk tinggi tetap (35% layar) */
-    flex: 0 0 35%; 
-    height: 35%; /* Fallback */
+    /* Tinggi Canvas = 50% Layar HP (Cukup besar untuk dilihat) */
+    height: 50vh; 
+    min-height: 300px;
     
-    min-height: 250px; 
     border-bottom: var(--glass-border); 
-    overflow: hidden; 
-    position: relative;
-    background: #111;
+    position: relative; /* Penting untuk Panning */
+    background: #111; /* Pembeda visual */
+    z-index: 10;
   }
   
   .zoom-controls-wrapper { 
-    bottom: 8px; right: 8px; 
-    transform: scale(0.85); 
-    transform-origin: bottom right;
+    bottom: 10px; right: 10px; 
+    transform: scale(0.9);
   }
 
-  /* 4. CONTROL PANEL (Flexible Space) */
+  /* 4. CONTROL PANEL (Urutan 2 - Inputan) */
   .control-panel { 
     order: 2; 
-    
-    /* MENGISI SISA RUANG ANTARA CANVAS & SIDEBAR */
-    flex: 1; 
-    height: auto; /* Biarkan flex yang mengatur tinggi */
+    width: 100%; 
+    height: auto; /* Tinggi otomatis mengikuti isi inputan */
     
     border-left: none; 
-    padding: 15px; 
-    
-    /* Scroll internal hanya di area form ini */
-    overflow-y: auto; 
-    -webkit-overflow-scrolling: touch;
+    padding: 20px; 
+    overflow: visible; 
   }
 
-  /* 5. SIDEBAR TEMPLATE (Fixed Bottom - BUKAN ABSOLUTE) */
+  /* 5. SIDEBAR TEMPLATE (Urutan 3 - Di Bawah Inputan) */
   .sidebar { 
     order: 3;
     
-    /* JANGAN pakai Absolute, pakai Flex agar punya ruang sendiri */
+    /* Posisi Static (Mengalir natural di bawah Control Panel) */
     position: relative; 
-    flex: 0 0 85px; /* Tinggi Tetap di Bawah */
-    
     width: 100%; 
-    z-index: 100;
+    height: auto; 
+    
     display: flex;
-    align-items: center;
-    overflow-x: auto; 
-    padding: 10px; 
+    flex-direction: column; /* Header Sidebar di atas, Grid di bawah */
     
+    padding: 20px; 
     border-top: var(--glass-border);
-    background: var(--bg-main); 
+    background: var(--bg-element); 
     
-    /* Reset state 'closed' agar selalu muncul di HP */
+    /* Reset style desktop */
     opacity: 1 !important;
     transform: none !important;
+    margin-left: 0;
   }
   
-  .sidebar.closed { width: 100%; padding: 10px; }
-  .sidebar-toggle-btn, .sidebar-header, .sidebar-title { display: none; }
-  
+  /* Header "Pilih Template" dimunculkan kembali agar jelas */
+  .sidebar-header { 
+    display: block; 
+    margin-bottom: 15px;
+  }
+  .sidebar-header h3 { font-size: 16px; margin: 0; }
+
+  /* Grid Template agar bisa discroll horizontal */
   .template-grid { 
     display: flex; 
-    gap: 10px; 
-    width: max-content; 
-    padding: 0; margin: 0;
+    flex-direction: row; /* Berjejer ke samping */
+    gap: 15px; 
+    width: 100%;
+    overflow-x: auto; /* Scroll samping */
+    padding-bottom: 10px;
   }
   
   .template-item { 
-    width: 70px; 
-    height: 55px; 
+    width: 100px; 
+    height: 75px; 
     flex-shrink: 0; 
-    border-radius: 6px;
+    border-radius: 8px;
   }
+
+  /* Sembunyikan tombol toggle sidebar karena sekarang selalu terlihat */
+  .sidebar-toggle-btn { display: none; }
 }
