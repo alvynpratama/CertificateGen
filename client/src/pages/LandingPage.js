@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/global.css';
-import AppLogo from '../../assets/templates/logo.png'; 
+import AppLogo from '../assets/templates/logo.png'; 
 
 // --- SVG ICONS ---
 const Icons = {
