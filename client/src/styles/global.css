@@ -240,144 +240,141 @@ body {
 @keyframes slideDown { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
 @keyframes slideUpFade { from { transform: translateY(30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
 
-/* --- RESPONSIVE FIX (MOBILE - COMPACT & SAFE) --- */
-
-/* Reset aturan tablet agar tidak mengganggu HP */
-@media screen and (max-width: 1024px) {
-  .control-panel { width: 300px; min-width: 300px; }
-}
-
+/* --- RESPONSIVE FIX (MOBILE - APP LAYOUT FIXED) --- */
 @media screen and (max-width: 768px) {
-  /* 1. SETUP LAYOUT UTAMA (SCROLLABLE) */
+  /* 1. Kunci Layar (Anti Goyang) */
   body, html { 
-    overflow-y: auto; 
-    height: auto; 
-    background-color: var(--bg-main);
+    overflow: hidden; 
+    height: 100dvh; /* Pakai DVH agar pas */
+    background-color: var(--bg-main); 
   }
   
   .main { 
-    height: auto; 
-    min-height: 100vh;
+    height: 100dvh; 
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
 
   .maincontainer { 
-    flex: 1; 
+    flex: 1; /* Isi sisa ruang di bawah header */
     display: flex;
-    flex-direction: column;
-    overflow: visible; 
-    height: auto;
-    width: 100vw;
-  }
-
-  /* 2. HEADER COMPACT (Kecil) */
-  .header { 
-    padding: 0 12px; 
-    height: 50px; /* Lebih kecil dari default 60px */
-    flex-shrink: 0;
+    flex-direction: column; /* Susun ke bawah */
+    overflow: hidden;
+    position: relative;
     width: 100%;
-    z-index: 50;
   }
-  /* Perkecil elemen header sedikit */
-  .brand-logo { height: 22px; width: auto; }
-  .brand-text { font-size: 14px; }
 
-  /* 3. CANVAS AREA */
+  /* 2. HEADER */
+  .header { 
+    flex: 0 0 55px; /* Tinggi fix */
+    z-index: 50;
+    width: 100%;
+    border-bottom: var(--glass-border);
+  }
+
+  /* 3. CANVAS (Tengah Atas) */
   .middle { 
     order: 1; 
-    width: 100%; 
-    height: 40vh; /* 40% Layar HP */
-    min-height: 250px;
-    border-bottom: var(--glass-border); 
+    /* Ambil 45% layar agar lega tapi sisa ruang cukup buat input */
+    flex: 0 0 45%; 
+    height: 45%; 
+    
     position: relative;
-    background: #111;
+    overflow: hidden; 
+    background: #111; /* Gelap total untuk canvas */
+    border-bottom: var(--glass-border);
     z-index: 10;
   }
   
   .zoom-controls-wrapper { 
-    bottom: 8px; right: 8px; 
-    transform: scale(0.85); /* Zoom button lebih kecil */
+    bottom: 10px; right: 10px; 
+    transform: scale(0.85); 
+    transform-origin: bottom right;
   }
 
-  /* 4. CONTROL PANEL (INPUT) */
+  /* 4. INPUT FORM (Tengah Bawah - Scrollable) */
   .control-panel { 
     order: 2; 
     
-    /* Lebar Penuh */
-    width: 100% !important; 
-    min-width: 100% !important; 
-    max-width: 100% !important;
-    
+    /* MENGISI SISA RUANG ANTARA CANVAS DAN SIDEBAR */
+    flex: 1; 
     height: auto; 
-    border-left: none; 
-    padding: 15px; /* Padding compact */
-    overflow: visible; 
-    box-sizing: border-box;
+    width: 100% !important; /* Paksa lebar penuh */
+    
+    overflow-y: auto; /* Scroll hanya di sini */
+    padding: 15px; 
+    
+    /* PENTING: Padding bawah agar konten paling bawah tidak mepet sidebar */
+    padding-bottom: 20px; 
+    
+    border-left: none;
+    background: var(--bg-main);
   }
 
-  /* Reset lebar inputan agar pas layar */
+  /* Reset lebar inputan mobile */
   .input-group, .input-field, .panel-section {
     width: 100% !important;
     box-sizing: border-box;
   }
 
-  /* 5. SIDEBAR TEMPLATE (BAWAH - FLOW NATURAL) */
+  /* 5. SIDEBAR TEMPLATE (Bawah Mentok - Fixed Height) */
   .sidebar { 
-    order: 3; 
-    position: relative; /* Tidak absolute/fixed */
-    width: 100%; 
-    height: auto; 
+    order: 3;
+    
+    /* Tinggi Fix di Bawah */
+    flex: 0 0 90px; 
+    height: 90px;
+    
+    width: 100%;
+    background: var(--bg-element); /* Warna solid (tidak transparan) */
+    border-top: var(--glass-border);
     
     display: flex;
-    flex-direction: column;
+    align-items: center;
     
-    padding: 15px 10px; /* Padding kecil */
-    border-top: var(--glass-border);
-    background: var(--bg-element); 
+    /* Scroll Samping */
+    overflow-x: auto; 
+    padding: 10px 15px;
+    z-index: 100; /* Z-Index tinggi agar selalu di atas */
     
-    /* Paksa Muncul */
+    /* Reset style desktop */
     opacity: 1 !important;
     transform: none !important;
     margin-left: 0;
   }
   
-  .sidebar-header { 
-    display: block; 
-    margin-bottom: 8px; /* Jarak header ke grid kecil */
-  }
-  .sidebar-header h3 { font-size: 13px; margin: 0; color: var(--text-muted); }
-
-  /* GRID TEMPLATE HORIZONTAL */
+  .sidebar.closed { width: 100%; padding: 10px 15px; opacity: 1; }
+  .sidebar-toggle-btn, .sidebar-header, .sidebar-title { display: none; }
+  
+  /* Grid Template Horizontal */
   .template-grid { 
     display: flex; 
     flex-direction: row; 
-    gap: 10px; 
-    width: 100%;
-    overflow-x: auto; 
-    padding-bottom: 5px;
-    
-    /* Sembunyikan scrollbar */
-    scrollbar-width: none; 
-    -ms-overflow-style: none;
+    gap: 12px; 
+    width: max-content; 
+    margin: 0; padding: 0;
   }
-  .template-grid::-webkit-scrollbar { display: none; }
   
-  /* ITEM TEMPLATE (UKURAN COMPACT) */
+  /* ITEM TEMPLATE */
   .template-item { 
-    width: 80px;  /* Ukuran kecil tapi jelas */
+    width: 80px; 
     height: 60px; 
     flex-shrink: 0; 
     border-radius: 6px;
     border: 1px solid var(--border-color);
     overflow: hidden;
     position: relative;
-    background: var(--bg-main); /* PENTING: Agar kotak upload terlihat */
+    background: var(--bg-main); /* Background item solid */
     
-    /* PENTING: Agar icon upload di tengah */
-    display: flex !important; 
-    align-items: center; 
+    /* Flex untuk menengahkan konten (Terutama tombol Upload) */
+    display: flex !important;
+    align-items: center;
     justify-content: center;
+  }
+  
+  .template-item.active {
+    border: 2px solid var(--primary);
   }
 
   /* PERBAIKAN TOMBOL UPLOAD */
@@ -389,10 +386,17 @@ body {
     width: 100%;
     height: 100%;
     gap: 4px;
+    color: var(--text-muted);
   }
   
-  .upload-placeholder svg { width: 18px; height: 18px; color: var(--text-muted); }
-  .upload-placeholder span { font-size: 9px; color: var(--text-muted); font-weight: 600; }
-
-  .sidebar-toggle-btn, .sidebar-title { display: none; }
+  .upload-placeholder svg { 
+    width: 20px; 
+    height: 20px; 
+    stroke: var(--text-muted);
+  }
+  
+  .upload-placeholder span { 
+    font-size: 10px; 
+    font-weight: 600; 
+  }
 }
