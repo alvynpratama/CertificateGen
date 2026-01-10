@@ -240,15 +240,15 @@ body {
 @keyframes slideDown { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
 @keyframes slideUpFade { from { transform: translateY(30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
 
-/* --- RESPONSIVE FIX (MOBILE - FINAL FIXED) --- */
+/* --- RESPONSIVE FIX (MOBILE - COMPACT & SAFE) --- */
 
-/* Reset aturan 1024px agar tidak mengganggu HP */
+/* Reset aturan tablet agar tidak mengganggu HP */
 @media screen and (max-width: 1024px) {
   .control-panel { width: 300px; min-width: 300px; }
 }
 
 @media screen and (max-width: 768px) {
-  /* 1. RESET BODY */
+  /* 1. SETUP LAYOUT UTAMA (SCROLLABLE) */
   body, html { 
     overflow-y: auto; 
     height: auto; 
@@ -268,23 +268,27 @@ body {
     flex-direction: column;
     overflow: visible; 
     height: auto;
-    width: 100vw; /* Pastikan lebar full viewport */
+    width: 100vw;
   }
 
-  /* 2. HEADER */
+  /* 2. HEADER COMPACT (Kecil) */
   .header { 
-    padding: 0 16px; 
-    height: 60px;
+    padding: 0 12px; 
+    height: 50px; /* Lebih kecil dari default 60px */
     flex-shrink: 0;
     width: 100%;
+    z-index: 50;
   }
+  /* Perkecil elemen header sedikit */
+  .brand-logo { height: 22px; width: auto; }
+  .brand-text { font-size: 14px; }
 
-  /* 3. CANVAS (Urutan 1) */
+  /* 3. CANVAS AREA */
   .middle { 
     order: 1; 
     width: 100%; 
-    height: 50vh; /* Tinggi Canvas 50% layar */
-    min-height: 300px;
+    height: 40vh; /* 40% Layar HP */
+    min-height: 250px;
     border-bottom: var(--glass-border); 
     position: relative;
     background: #111;
@@ -292,50 +296,47 @@ body {
   }
   
   .zoom-controls-wrapper { 
-    bottom: 10px; right: 10px; 
-    transform: scale(0.9);
+    bottom: 8px; right: 8px; 
+    transform: scale(0.85); /* Zoom button lebih kecil */
   }
 
-  /* 4. CONTROL PANEL (Urutan 2) - PERBAIKAN INPUT */
+  /* 4. CONTROL PANEL (INPUT) */
   .control-panel { 
     order: 2; 
     
-    /* Paksa lebar penuh untuk menimpa aturan desktop/tablet */
+    /* Lebar Penuh */
     width: 100% !important; 
     min-width: 100% !important; 
     max-width: 100% !important;
     
     height: auto; 
     border-left: none; 
-    padding: 20px; 
-    padding-bottom: 30px; /* Jarak aman sebelum template */
+    padding: 15px; /* Padding compact */
     overflow: visible; 
-    box-sizing: border-box; /* Pastikan padding tidak menambah lebar */
-  }
-
-  /* Paksa semua inputan menjadi lebar penuh */
-  .input-group, 
-  .input-field, 
-  .panel-section {
-    width: 100% !important;
-    max-width: 100% !important;
     box-sizing: border-box;
   }
 
-  /* 5. SIDEBAR TEMPLATE (Urutan 3) */
+  /* Reset lebar inputan agar pas layar */
+  .input-group, .input-field, .panel-section {
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  /* 5. SIDEBAR TEMPLATE (BAWAH - FLOW NATURAL) */
   .sidebar { 
-    order: 3;
-    position: relative; 
+    order: 3; 
+    position: relative; /* Tidak absolute/fixed */
     width: 100%; 
     height: auto; 
     
     display: flex;
     flex-direction: column;
     
-    padding: 20px 15px; 
+    padding: 15px 10px; /* Padding kecil */
     border-top: var(--glass-border);
     background: var(--bg-element); 
     
+    /* Paksa Muncul */
     opacity: 1 !important;
     transform: none !important;
     margin-left: 0;
@@ -343,40 +344,39 @@ body {
   
   .sidebar-header { 
     display: block; 
-    margin-bottom: 12px;
+    margin-bottom: 8px; /* Jarak header ke grid kecil */
   }
-  .sidebar-header h3 { font-size: 14px; margin: 0; color: var(--text-muted); }
+  .sidebar-header h3 { font-size: 13px; margin: 0; color: var(--text-muted); }
 
-  /* GRID TEMPLATE (Scroll Samping) */
+  /* GRID TEMPLATE HORIZONTAL */
   .template-grid { 
     display: flex; 
     flex-direction: row; 
-    gap: 12px; 
+    gap: 10px; 
     width: 100%;
     overflow-x: auto; 
-    padding-bottom: 10px;
-    /* Hilangkan scrollbar jelek */
+    padding-bottom: 5px;
+    
+    /* Sembunyikan scrollbar */
     scrollbar-width: none; 
     -ms-overflow-style: none;
   }
+  .template-grid::-webkit-scrollbar { display: none; }
   
-  .template-grid::-webkit-scrollbar { 
-    display: none; 
-  }
-  
+  /* ITEM TEMPLATE (UKURAN COMPACT) */
   .template-item { 
-    width: 100px; 
-    height: 70px; 
+    width: 80px;  /* Ukuran kecil tapi jelas */
+    height: 60px; 
     flex-shrink: 0; 
-    border-radius: 8px;
+    border-radius: 6px;
     border: 1px solid var(--border-color);
     overflow: hidden;
     position: relative;
-    background: var(--bg-main); /* Agar kotak upload terlihat */
+    background: var(--bg-main); /* PENTING: Agar kotak upload terlihat */
     
-    /* Pastikan konten di tengah (untuk tombol Upload) */
-    display: flex !important;
-    align-items: center;
+    /* PENTING: Agar icon upload di tengah */
+    display: flex !important; 
+    align-items: center; 
     justify-content: center;
   }
 
@@ -386,14 +386,13 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 5px;
     width: 100%;
     height: 100%;
-    color: var(--text-muted);
+    gap: 4px;
   }
   
-  .upload-placeholder svg { width: 20px; height: 20px; }
-  .upload-placeholder span { font-size: 10px; font-weight: 500; }
+  .upload-placeholder svg { width: 18px; height: 18px; color: var(--text-muted); }
+  .upload-placeholder span { font-size: 9px; color: var(--text-muted); font-weight: 600; }
 
-  .sidebar-toggle-btn { display: none; }
+  .sidebar-toggle-btn, .sidebar-title { display: none; }
 }
