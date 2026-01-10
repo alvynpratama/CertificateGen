@@ -327,8 +327,8 @@ body {
     height: 90px;
     
     width: 100%;
-    background: var(--bg-element); /* Warna solid (tidak transparan) */
-    border-top: var(--glass-border);
+    background: #1a1a1a; /* Warna solid (tidak transparan) */
+    border-top: 1px solid rgba(255,255,255,0.1);
     
     display: flex;
     align-items: center;
