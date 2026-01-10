@@ -6,8 +6,6 @@
   --bg-gradient: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
   --text-main: #2d0f59;
   --text-muted: #6b5b95;
-  --bg-main: #f4f6f8;
-  --bg-body: #f4f6f8;
   
   --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-border: 1px solid rgba(255, 255, 255, 0.8);
@@ -32,8 +30,6 @@
   --bg-gradient: linear-gradient(to bottom, #000000 0%, #0a0510 100%);
   --text-main: #ffffff;
   --text-muted: #a3a3a3;
-  --bg-main: #0a0510;
-  --bg-body: #0a0510;
   
   --glass-bg: rgba(20, 20, 30, 0.95);
   --glass-border: 1px solid rgba(255, 255, 255, 0.08);
