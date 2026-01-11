@@ -124,24 +124,23 @@ const LandingPage = () => {
                         ]}
                     />
 
-                    {/* TIER 2: 30K */}
+                    {/* TIER 2: 10K */}
                     <PricingCard 
                         title="Basic Batch" 
                         qty="31 - 100 Data"
-                        price="Rp 15.000" 
+                        price="Rp 10.000" 
                         features={[
                             "Semua Fitur Starter",
                             "Prioritas Server (Cepat)",
                             "Simpan History 20 Hari",
-                            "Dukungan Email"
                         ]}
                     />
 
-                    {/* TIER 3: 50K */}
+                    {/* TIER 3: 25K */}
                     <PricingCard 
                         title="Pro Batch" 
                         qty="101 - 150 Data"
-                        price="Rp 40.000" 
+                        price="Rp 25.000" 
                         isPopular={true}
                         features={[
                             "Semua Fitur Basic",
@@ -151,11 +150,11 @@ const LandingPage = () => {
                         ]}
                     />
 
-                    {/* TIER 4: 75K */}
+                    {/* TIER 4: 49K */}
                     <PricingCard 
                         title="Enterprise" 
                         qty="> 150 Data"
-                        price="Rp 65.000" 
+                        price="Rp 49.000" 
                         features={[
                             "Semua Fitur Pro",
                             "Unlimited Processing",
