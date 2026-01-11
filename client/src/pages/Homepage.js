@@ -326,9 +326,9 @@ function Homepage() {
     // --- LOGIC HARGA ---
         const calculatePrice = (qty) => {
         if (qty <= 30) return 0;
-        if (qty <= 100) return 15000;
-        if (qty <= 150) return 40000;
-        return 65000;
+        if (qty <= 100) return 10000;
+        if (qty <= 150) return 25000;
+        return 49000;
     };
 
     // LOGIKA WATERMARK
@@ -386,9 +386,9 @@ function Homepage() {
         let planType = 'Free';
         let retentionDays = 7;
 
-        if (cost === 15000) { planType = 'Basic'; retentionDays = 25; }
-        else if (cost === 40000) { planType = 'Pro'; retentionDays = 30; }
-        else if (cost >= 65000) { planType = 'Enterprise'; retentionDays = 50; }
+        if (cost === 10000) { planType = 'Basic'; retentionDays = 25; }
+        else if (cost === 25000) { planType = 'Pro'; retentionDays = 30; }
+        else if (cost >= 49000) { planType = 'Enterprise'; retentionDays = 50; }
 
         const activityData = {
             email: finalUser ? finalUser.email : 'Guest',
