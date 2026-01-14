@@ -24,17 +24,22 @@ export const createTransaction = async (orderData) => {
 };
 
 export const loadSnapScript = (clientKey) => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         if (document.getElementById('midtrans-script')) {
             resolve(true);
             return;
         }
-
-        const script = document.createElement("script");
+        const isProduction = !clientKey.includes('SB-'); 
+        
+        const src = isProduction 
+            ? 'https://app.midtrans.com/snap/snap.js'  // URL PRODUCTION
+            : 'https://app.sandbox.midtrans.com/snap/snap.js'; // URL SANDBOX
+        const script = document.createElement('script');
+        script.src = src;
         script.id = 'midtrans-script';
-        script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
-        script.setAttribute("data-client-key", clientKey); 
-        script.onload = () => resolve(true);
+        script.setAttribute('data-client-key', clientKey); 
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('Gagal memuat Midtrans Snap.js'));
         document.body.appendChild(script);
     });
 };
