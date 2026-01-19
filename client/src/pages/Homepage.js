@@ -43,15 +43,15 @@ function Homepage() {
     useEffect(() => {
         // 1. Cek Sesi Admin
         const storedAdmin = localStorage.getItem('adminUser');
-        if (storedAdmin) { 
-            setUser(JSON.parse(storedAdmin)); 
-            setIsAdmin(true); 
+        if (storedAdmin) {
+            setUser(JSON.parse(storedAdmin));
+            setIsAdmin(true);
         } else {
             // 2. Cek Sesi User Biasa
             const storedUser = localStorage.getItem('certUser');
-            if (storedUser) { 
-                setUser(JSON.parse(storedUser)); 
-                setIsAdmin(false); 
+            if (storedUser) {
+                setUser(JSON.parse(storedUser));
+                setIsAdmin(false);
             }
         }
 
@@ -70,14 +70,14 @@ function Homepage() {
 
     const handleLoginSuccess = (userData) => {
         setUser(userData);
-        if (userData.role === 'admin') { 
-            setIsAdmin(true); 
-            localStorage.setItem('adminUser', JSON.stringify(userData)); 
-            navigate('/admin-dashboard'); 
-        } 
-        else { 
-            setIsAdmin(false); 
-            localStorage.setItem('certUser', JSON.stringify(userData)); 
+        if (userData.role === 'admin') {
+            setIsAdmin(true);
+            localStorage.setItem('adminUser', JSON.stringify(userData));
+            navigate('/admin-dashboard');
+        }
+        else {
+            setIsAdmin(false);
+            localStorage.setItem('certUser', JSON.stringify(userData));
         }
         setIsLoginModalOpen(false);
         showModal({ title: 'Login Berhasil', message: `Selamat datang, ${userData.name}!`, type: 'alert', confirmText: 'Lanjut' });
@@ -94,28 +94,28 @@ function Homepage() {
         const handleResize = () => { const w = window.innerWidth; if (w < 768) setZoom(0.35); else if (w < 1200) setZoom(0.45); else setZoom(0.55); };
         handleResize(); window.addEventListener('resize', handleResize); return () => window.removeEventListener('resize', handleResize);
     }, []);
-    
+
     // --- MIDTRANS RETURN HANDLER ---
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
-        const status = query.get('transaction_status'); 
-        const statusCode = query.get('status_code');    
+        const status = query.get('transaction_status');
+        const statusCode = query.get('status_code');
 
-        if ( (status === 'settlement' || status === 'capture') && statusCode === '200' ) {
+        if ((status === 'settlement' || status === 'capture') && statusCode === '200') {
             console.log("Payment Success Detected inside useEffect");
 
             const pendingDataStr = localStorage.getItem('pending_cert_data');
-            
+
             if (pendingDataStr) {
                 const { qty, price, dataSource } = JSON.parse(pendingDataStr);
 
                 let currentUser = null;
                 const storedAdmin = localStorage.getItem('adminUser');
                 const storedUser = localStorage.getItem('certUser');
-                
+
                 if (storedAdmin) currentUser = JSON.parse(storedAdmin);
                 else if (storedUser) currentUser = JSON.parse(storedUser);
-                
+
                 console.log("📦 Data Retrieved from Storage:", { qty, price, dataSourceLength: dataSource?.length }); // LOG 2
 
                 if (!dataSource || dataSource.length === 0) {
@@ -129,15 +129,15 @@ function Homepage() {
 
                 setTimeout(async () => {
                     saveToHistory(qty, price, dataSource, currentUser);
-                    
+
                     console.log("Starting executeZip...");
                     await executeZip(qty, dataSource, price);
                     console.log("executeZip Finished.");
-                    
+
                     localStorage.removeItem('pending_cert_data');
-                    window.history.replaceState({}, document.title, "/"); 
+                    window.history.replaceState({}, document.title, "/");
                     setIsProcessing(false);
-                    
+
                 }, 1000);
             } else {
                 console.warn("No pending data found in LocalStorage");
@@ -162,19 +162,21 @@ function Homepage() {
     const handleZoomOut = () => setZoom(p => Math.max(p - 0.05, 0.1));
 
     // --- LOGIC PANNING ---
-    const handlePointerDown = (e) => { 
+    const handlePointerDown = (e) => {
         const target = e.target;
-        const targetId = target.id;
 
-        const isElementID = ['heading', 'name', 'desc', 'author', 'date', 'qr', 'logo', 'signature'].includes(targetId) 
-                            || (targetId && targetId.startsWith('extra-'));
-        
-        const isControl = target.closest('.moveable-control-box') 
-                          || target.closest('.moveable-line') 
-                          || target.closest('.moveable-area');
+        // Check if clicking on a draggable element (check the element itself or any parent)
+        const draggableIds = ['heading', 'name', 'desc', 'author', 'date', 'qr', 'logo', 'signature'];
+        const isOnDraggableElement = draggableIds.some(id => target.closest(`#${id}`))
+            || (target.id && target.id.startsWith('extra-'))
+            || (target.closest('[id^="extra-"]'));
 
-        if (isElementID || isControl) {
-            return; 
+        const isControl = target.closest('.moveable-control-box')
+            || target.closest('.moveable-line')
+            || target.closest('.moveable-area');
+
+        if (isOnDraggableElement || isControl) {
+            return;
         }
 
         setIsPanning(true);
@@ -189,7 +191,7 @@ function Homepage() {
         const dy = e.clientY - lastPosRef.current.y;
 
         setPan(prev => ({ x: prev.x + dx, y: prev.y + dy }));
-        
+
         lastPosRef.current = { x: e.clientX, y: e.clientY };
     };
 
@@ -324,7 +326,7 @@ function Homepage() {
     const confirmRemoveSig = () => { setSignatureImg(null); };
 
     // --- LOGIC HARGA ---
-        const calculatePrice = (qty) => {
+    const calculatePrice = (qty) => {
         if (qty <= 30) return 0;
         if (qty <= 100) return 10000;
         if (qty <= 150) return 25000;
@@ -338,11 +340,11 @@ function Homepage() {
 
     // --- CEK DAILY QUOTA ---
     const checkDailyQuota = (qty) => {
-        if (isAdmin) return true; 
-        if (calculatePrice(qty) > 0) return true; 
+        if (isAdmin) return true;
+        if (calculatePrice(qty) > 0) return true;
 
         // Logic Limit Harian untuk Gratis
-        const today = new Date().toDateString(); 
+        const today = new Date().toDateString();
         const storageKey = 'daily_usage_log';
         let usageData = JSON.parse(localStorage.getItem(storageKey) || '{}');
 
@@ -354,10 +356,10 @@ function Homepage() {
         // Cek Sisa Kuota
         if (usageData.count + qty > 30) {
             const sisa = Math.max(0, 30 - usageData.count);
-            showModal({ 
-                title: 'Limit Harian Tercapai', 
-                message: `Kuota gratis harian Anda tersisa: ${sisa}.\nAnda meminta: ${qty}.\n\nSilakan kurangi jumlah, upgrade ke Premium, atau kembali besok.`, 
-                type: 'alert' 
+            showModal({
+                title: 'Limit Harian Tercapai',
+                message: `Kuota gratis harian Anda tersisa: ${sisa}.\nAnda meminta: ${qty}.\n\nSilakan kurangi jumlah, upgrade ke Premium, atau kembali besok.`,
+                type: 'alert'
             });
             return false;
         }
@@ -370,10 +372,10 @@ function Homepage() {
         const today = new Date().toDateString();
         const storageKey = 'daily_usage_log';
         let usageData = JSON.parse(localStorage.getItem(storageKey) || '{}');
-        
+
         if (usageData.date !== today) usageData = { date: today, count: 0 };
         usageData.count += qty;
-        
+
         localStorage.setItem(storageKey, JSON.stringify(usageData));
     };
 
@@ -382,7 +384,7 @@ function Homepage() {
         updateDailyQuota(count);
 
         const finalUser = currentUserOverride || user;
-        
+
         let planType = 'Free';
         let retentionDays = 7;
 
@@ -420,7 +422,7 @@ function Homepage() {
         try {
             const currentHistory = JSON.parse(localStorage.getItem(`history_${finalUser.email}`) || '[]');
             localStorage.setItem(`history_${finalUser.email}`, JSON.stringify([newEntry, ...currentHistory]));
-        } catch (e) { 
+        } catch (e) {
             console.error(e);
             alert("Penyimpanan Browser Penuh. History lama mungkin tidak tersimpan.");
         }
@@ -497,19 +499,19 @@ function Homepage() {
         } else {
             // Jika Gratis
             if (qty === 1) {
-                executeSinglePDF(dataSource[0]); 
+                executeSinglePDF(dataSource[0]);
             } else {
                 // Batch ZIP
-                showModal({ 
-                    type: 'confirm', 
-                    title: 'Konfirmasi', 
-                    message: `Cetak ${qty} sertifikat (Gratis)?`, 
-                    confirmText: 'Mulai', 
-                    onConfirm: () => { 
-                        closeModal(); 
-                        saveToHistory(qty, 0, dataSource); 
-                        executeZip(qty, dataSource, 0); 
-                    } 
+                showModal({
+                    type: 'confirm',
+                    title: 'Konfirmasi',
+                    message: `Cetak ${qty} sertifikat (Gratis)?`,
+                    confirmText: 'Mulai',
+                    onConfirm: () => {
+                        closeModal();
+                        saveToHistory(qty, 0, dataSource);
+                        executeZip(qty, dataSource, 0);
+                    }
                 });
             }
         }
@@ -519,8 +521,8 @@ function Homepage() {
     const processMidtransPayment = async (qty, price, dataSource) => {
         setIsProcessing(true);
         localStorage.setItem('pending_cert_data', JSON.stringify({
-            qty, 
-            price, 
+            qty,
+            price,
             dataSource,
             timestamp: Date.now()
         }));
@@ -589,10 +591,10 @@ function Homepage() {
             const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
             pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width, canvas.height);
             pdf.save(`${name || 'Certificate'}.pdf`);
-            
+
             // Simpan history single
-            saveToHistory(1, 0, singleData ? [singleData] : [{Name: name}]);
-            
+            saveToHistory(1, 0, singleData ? [singleData] : [{ Name: name }]);
+
             closeModal();
             showModal({ title: 'Selesai', message: 'Berhasil!', type: 'alert', confirmText: 'OK', onConfirm: () => { closeModal(); resetAllInputs(); } });
         } catch (e) { closeModal(); alert("Gagal: " + e.message); }
@@ -606,7 +608,7 @@ function Homepage() {
         }
 
         setSelectedId(null);
-        abortRef.current = false; 
+        abortRef.current = false;
         setIsProcessing(true);
         const zip = new JSZip();
 
@@ -628,13 +630,13 @@ function Homepage() {
                 }
 
                 // Update Progress Modal
-                showModal({ 
-                    type: 'loading', 
-                    title: 'Mencetak...', 
-                    message: `Memproses data ke-${i + 1} dari ${qty}`, 
-                    progress: i + 1, 
-                    total: qty, 
-                    onCancel: handleCancelProcess 
+                showModal({
+                    type: 'loading',
+                    title: 'Mencetak...',
+                    message: `Memproses data ke-${i + 1} dari ${qty}`,
+                    progress: i + 1,
+                    total: qty,
+                    onCancel: handleCancelProcess
                 });
 
                 // --- INNER TRY-CATCH (Agar 1 error tidak mematikan semua) ---
@@ -642,20 +644,20 @@ function Homepage() {
                     // Update Nama & ID
                     const possibleKeys = ['Name', 'name', 'Nama', 'nama']; let pName = "User";
                     for (const key of possibleKeys) if (person[key]) { pName = person[key]; break; }
-                    if(pName === "User" && Object.values(person)[0]) pName = Object.values(person)[0];
+                    if (pName === "User" && Object.values(person)[0]) pName = Object.values(person)[0];
 
                     const pID = uuidv4().slice(0, 8).toUpperCase();
 
-                    setName(pName); 
+                    setName(pName);
                     setGeneratedID(pID);
                     await document.fonts.ready;
                     await new Promise(r => setTimeout(r, 800));
 
                     // Cek apakah elemen ada sebelum capture
-                    if(!el) throw new Error("Print Area Element not found in DOM");
+                    if (!el) throw new Error("Print Area Element not found in DOM");
 
-                    const canvas = await html2canvas(el, { 
-                        scale: 1.5, 
+                    const canvas = await html2canvas(el, {
+                        scale: 1.5,
                         useCORS: true,
                         logging: false
                     });
@@ -665,29 +667,29 @@ function Homepage() {
                     zip.file(`${pName}_${pID}.pdf`, pdf.output('blob'));
 
                 } catch (innerError) {
-                    console.error(`Error on item ${i+1}:`, innerError);
+                    console.error(`Error on item ${i + 1}:`, innerError);
                 }
             }
-            
+
             if (!abortRef.current) {
                 if (Object.keys(zip.files).length === 0) {
                     throw new Error("No files were generated successfully.");
                 }
 
-                setIsProcessing(true); 
+                setIsProcessing(true);
                 showModal({ type: 'loading', title: 'Compressing...', message: 'Sedang membuat file ZIP...', progress: qty, total: qty });
-                
+
                 const content = await zip.generateAsync({ type: 'blob' });
                 saveAs(content, 'Certificates.zip');
-                
+
                 showModal({ title: 'Selesai', message: 'Download berhasil dimulai!', type: 'alert', confirmText: 'OK', onConfirm: () => { closeModal(); resetAllInputs(); } });
             }
-        } catch (e) { 
-            setIsProcessing(false); 
+        } catch (e) {
+            setIsProcessing(false);
             showModal({ title: 'Error', message: 'Terjadi kesalahan: ' + e.message, type: 'alert' });
         }
-        
-        return true; 
+
+        return true;
     };
 
     const finalQrValue = qrContent.trim() !== '' ? qrContent : generatedID;
@@ -702,12 +704,12 @@ function Homepage() {
     return (
         <div className={`main ${theme === 'dark' ? 'dark-theme' : 'light-theme'}`}>
             <CustomModal config={modal} onClose={closeModal} />
-            <LoginModal 
-                isOpen={isLoginModalOpen} 
-                onClose={() => setIsLoginModalOpen(false)} 
-                onLogin={handleLoginSuccess} 
-                onShowAlert={showModal} 
-                isAdminMode={isAdmin} 
+            <LoginModal
+                isOpen={isLoginModalOpen}
+                onClose={() => setIsLoginModalOpen(false)}
+                onLogin={handleLoginSuccess}
+                onShowAlert={showModal}
+                isAdminMode={isAdmin}
             />
             <HistoryModal isOpen={showHistory} onClose={() => setShowHistory(false)} user={user} onReDownload={handleHistoryReDownload} />
 
@@ -722,7 +724,7 @@ function Homepage() {
                         logo={logo} customBackground={activeCustomBg} signatureImg={signatureImg}
                         showQR={showQR} qrValue={finalQrValue} qrColor={qrColor} imageStyles={imageStyles}
                         qrStyle={qrStyle} zoom={1}
-                        showWatermark={isWatermarkActive} 
+                        showWatermark={isWatermarkActive}
                         watermarkImg={AppLogo}
                     />
                 </div>
@@ -737,27 +739,27 @@ function Homepage() {
                     onSelectCustomBg={handleSelectCustomBg} onRemoveCustomBg={handleRemoveCustomBg}
                     theme={theme}
                 />
-                <div 
-                    className="middle" 
-                    ref={middleRef} 
-                    title="Klik kiri & drag untuk geser view" 
+                <div
+                    className="middle"
+                    ref={middleRef}
+                    title="Klik kiri & drag untuk geser view"
                     onClick={() => setSelectedId(null)}
-                    
+
                     // --- EVENT HANDLERS ---
                     onPointerDown={handlePointerDown}
                     onPointerMove={handlePointerMove}
                     onPointerUp={handlePointerUp}
                     onPointerLeave={handlePointerUp}
-                    
+
                     // --- STYLE POINTER ---
-                    style={{ cursor: isPanning ? 'grabbing' : 'grab', touchAction: 'none' }} 
+                    style={{ cursor: isPanning ? 'grabbing' : 'grab', touchAction: 'none' }}
                 >
-                    <div 
-                        style={{ 
-                            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, 
-                            transformOrigin: 'center center', 
-                            transition: isPanning ? 'none' : 'transform 0.1s ease-out' 
-                        }} 
+                    <div
+                        style={{
+                            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                            transformOrigin: 'center center',
+                            transition: isPanning ? 'none' : 'transform 0.1s ease-out'
+                        }}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <ComponentToPrint id="template-area" isPreview={true} template={template} {...allTextProps} selectedId={selectedId} setSelectedId={setSelectedId} onStyleChange={handleStyleChange} handleImageStyleChange={handleImageStyleChange} handleQrStyleChange={handleQrStyleChange} qrStyle={qrStyle} zoom={zoom} logo={logo} customBackground={activeCustomBg} signatureImg={signatureImg} showQR={showQR} qrValue={finalQrValue} qrColor={qrColor} imageStyles={imageStyles} showWatermark={isWatermarkActive} watermarkImg={AppLogo} />
