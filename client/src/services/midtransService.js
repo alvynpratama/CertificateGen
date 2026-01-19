@@ -34,6 +34,7 @@ export const loadSnapScript = (clientKey) => {
         const src = isProduction 
             ? 'https://app.midtrans.com/snap/snap.js'  // URL PRODUCTION
             : 'https://app.sandbox.midtrans.com/snap/snap.js'; // URL SANDBOX
+        console.log("Midtrans Mode:", isProduction ? "PRODUCTION" : "SANDBOX");    
         const script = document.createElement('script');
         script.src = src;
         script.id = 'midtrans-script';
