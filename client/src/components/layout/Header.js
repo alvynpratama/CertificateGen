@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import AppLogo from '../../assets/templates/logo.png'; 
-
 
 // --- IKON MODERN ---
 const SunIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>;
@@ -10,15 +9,18 @@ const MoonIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="non
 const HistoryIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
 const UserIcon = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
 const LogoutIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>;
+const TicketIcon = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>;
 
 const Header = ({ theme, setTheme, user, onHistoryClick, onLoginClick, onLogout }) => {
     const navigate = useNavigate();
     const [dailyQuota, setDailyQuota] = useState(30);
 
+    // --- LOGIC AMBIL KUOTA (Polling) ---
+    // Kita pakai interval agar angka selalu update real-time saat user generate di halaman lain
     useEffect(() => {
         const checkQuota = () => {
             if (user?.role === 'admin') {
-                setDailyQuota("∞");
+                setDailyQuota("∞"); // Admin unlimited
                 return;
             }
 
@@ -26,14 +28,14 @@ const Header = ({ theme, setTheme, user, onHistoryClick, onLoginClick, onLogout 
             const usageData = JSON.parse(localStorage.getItem('daily_usage_log') || '{}');
             
             if (usageData.date !== today) {
-                setDailyQuota(30);
+                setDailyQuota(30); // Reset hari baru
             } else {
                 setDailyQuota(Math.max(0, 30 - (usageData.count || 0)));
             }
         };
 
-        checkQuota();
-        const interval = setInterval(checkQuota, 2000);
+        checkQuota(); // Jalan pertama kali
+        const interval = setInterval(checkQuota, 2000); // Cek tiap 2 detik
 
         return () => clearInterval(interval);
     }, [user]);
@@ -46,6 +48,7 @@ const Header = ({ theme, setTheme, user, onHistoryClick, onLoginClick, onLogout 
             </div>
 
             <div className="header-actions">
+                
                 {/* --- INDIKATOR KUOTA (BARU) --- */}
                 {!user || user.role !== 'admin' ? (
                     <div style={{
@@ -78,7 +81,8 @@ const Header = ({ theme, setTheme, user, onHistoryClick, onLoginClick, onLogout 
                 {user ? (
                     <div style={{display:'flex', alignItems:'center', gap:'12px'}}>
                         <div style={{display:'flex', alignItems:'center', gap:'10px', paddingLeft:'15px', borderLeft:'1px solid var(--glass-border)'}}>
-                            <div style={{textAlign:'right', lineHeight:'1.3'}}>
+                            {/* Hide name on mobile to save space */}
+                            <div className="user-info-text" style={{textAlign:'right', lineHeight:'1.3'}}>
                                 <div style={{fontSize:'13px', fontWeight:'600', color:'var(--text-main)'}}>{user.name}</div>
                                 <div style={{fontSize:'10px', color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.5px'}}>
                                     {user.role === 'admin' ? 'PRO ACCOUNT' : 'BASIC USER'}
@@ -104,6 +108,8 @@ const Header = ({ theme, setTheme, user, onHistoryClick, onLoginClick, onLogout 
                     </button>
                 )}
             </div>
+
+            {/* CSS INLINE UNTUK RESPONSIVE USER NAME */}
             <style>{`
                 @media (max-width: 768px) {
                     .user-info-text { display: none; }
