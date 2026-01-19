@@ -13,6 +13,30 @@ const LogoutIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="n
 
 const Header = ({ theme, setTheme, user, onHistoryClick, onLoginClick, onLogout }) => {
     const navigate = useNavigate();
+    const [dailyQuota, setDailyQuota] = useState(30);
+
+    useEffect(() => {
+        const checkQuota = () => {
+            if (user?.role === 'admin') {
+                setDailyQuota("∞");
+                return;
+            }
+
+            const today = new Date().toDateString();
+            const usageData = JSON.parse(localStorage.getItem('daily_usage_log') || '{}');
+            
+            if (usageData.date !== today) {
+                setDailyQuota(30);
+            } else {
+                setDailyQuota(Math.max(0, 30 - (usageData.count || 0)));
+            }
+        };
+
+        checkQuota();
+        const interval = setInterval(checkQuota, 2000);
+
+        return () => clearInterval(interval);
+    }, [user]);
 
     return (
         <header className="header">
@@ -22,6 +46,21 @@ const Header = ({ theme, setTheme, user, onHistoryClick, onLoginClick, onLogout 
             </div>
 
             <div className="header-actions">
+                {/* --- INDIKATOR KUOTA (BARU) --- */}
+                {!user || user.role !== 'admin' ? (
+                    <div style={{
+                        display: 'flex', alignItems: 'center', gap: '6px',
+                        background: 'rgba(16, 185, 129, 0.1)', 
+                        border: '1px solid rgba(16, 185, 129, 0.2)',
+                        padding: '6px 12px', borderRadius: '20px', marginRight: '10px'
+                    }} title="Sisa Kuota Gratis Hari Ini">
+                        <div style={{color: '#10b981'}}><TicketIcon /></div>
+                        <div style={{fontSize: '13px', fontWeight: '700', color: '#10b981'}}>
+                            {dailyQuota} <span style={{fontSize: '11px', fontWeight: '400', opacity: 0.8}}>Free</span>
+                        </div>
+                    </div>
+                ) : null}
+
                 <button 
                     className="btn-icon" 
                     onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} 
@@ -65,6 +104,11 @@ const Header = ({ theme, setTheme, user, onHistoryClick, onLoginClick, onLogout 
                     </button>
                 )}
             </div>
+            <style>{`
+                @media (max-width: 768px) {
+                    .user-info-text { display: none; }
+                }
+            `}</style>
         </header>
     );
 };

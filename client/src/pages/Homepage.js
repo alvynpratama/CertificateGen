@@ -328,9 +328,16 @@ function Homepage() {
     // --- LOGIC HARGA ---
     const calculatePrice = (qty) => {
         if (qty <= 30) return 0;
-        if (qty <= 100) return 10000;
-        if (qty <= 150) return 25000;
-        return 49000;
+        const excess = qty - 30;
+        const pricePerSheet = 500;
+        let total = excess * pricePerSheet;
+        if (total < 2000) {
+            total = 2000;
+        }
+        if (total > 49000) {
+            return 49000;
+        }
+        return total;
     };
 
     // LOGIKA WATERMARK
@@ -342,18 +349,13 @@ function Homepage() {
     const checkDailyQuota = (qty) => {
         if (isAdmin) return true;
         if (calculatePrice(qty) > 0) return true;
-
-        // Logic Limit Harian untuk Gratis
         const today = new Date().toDateString();
         const storageKey = 'daily_usage_log';
         let usageData = JSON.parse(localStorage.getItem(storageKey) || '{}');
-
-        // Reset jika beda hari
+        if (usageData.date !== today) { usageData = { date: today, count: 0 }; }
         if (usageData.date !== today) {
             usageData = { date: today, count: 0 };
         }
-
-        // Cek Sisa Kuota
         if (usageData.count + qty > 30) {
             const sisa = Math.max(0, 30 - usageData.count);
             showModal({
@@ -380,23 +382,33 @@ function Homepage() {
     };
 
     // 1. Simpan ke Database & Local
-    const saveToHistory = (count, cost, dataUsed, currentUserOverride = null) => {
+const saveToHistory = (count, cost, dataUsed, currentUserOverride = null) => {
         updateDailyQuota(count);
 
         const finalUser = currentUserOverride || user;
 
+        // --- LOGIC PENENTUAN RETENSI DATA (BARU) ---
         let planType = 'Free';
-        let retentionDays = 7;
+        let retentionDays = 7; // Default Gratis
 
-        if (cost === 10000) { planType = 'Basic'; retentionDays = 25; }
-        else if (cost === 25000) { planType = 'Pro'; retentionDays = 30; }
-        else if (cost >= 49000) { planType = 'Enterprise'; retentionDays = 50; }
+        if (cost > 0) {
+            if (cost < 15000) {
+                planType = 'Basic (Micro)';
+                retentionDays = 7;
+            } else if (cost < 49000) {
+                planType = 'Pro';
+                retentionDays = 14;
+            } else {
+                planType = 'Enterprise';
+                retentionDays = 30; 
+            }
+        }
 
         const activityData = {
             email: finalUser ? finalUser.email : 'Guest',
             name: finalUser ? finalUser.name : 'Guest',
             type: dataUsed.length > 1 ? 'Batch Generate' : 'Single PDF',
-            details: `Qty: ${count} | Plan: ${planType}`
+            details: `Qty: ${count} | Cost: ${cost} | Plan: ${planType}`
         };
 
         const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -408,9 +420,13 @@ function Homepage() {
 
         if (!finalUser) return;
 
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + retentionDays);
+
         const newEntry = {
             id: uuidv4(),
             date: new Date().toISOString(),
+            expiryDate: expiryDate.toISOString(),
             qty: count,
             fileName: `Certificates (${planType})`,
             cost: cost,
@@ -420,11 +436,18 @@ function Homepage() {
         };
 
         try {
-            const currentHistory = JSON.parse(localStorage.getItem(`history_${finalUser.email}`) || '[]');
-            localStorage.setItem(`history_${finalUser.email}`, JSON.stringify([newEntry, ...currentHistory]));
+            const storageKey = `history_${finalUser.email}`;
+            let currentHistory = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            const now = new Date();
+            currentHistory = currentHistory.filter(item => {
+                if (!item.expiryDate) return true;
+                return new Date(item.expiryDate) > now;
+            });
+
+            localStorage.setItem(storageKey, JSON.stringify([newEntry, ...currentHistory]));
         } catch (e) {
             console.error(e);
-            alert("Penyimpanan Browser Penuh. History lama mungkin tidak tersimpan.");
+            alert("Penyimpanan Browser Penuh. Mohon hapus history lama secara manual.");
         }
     };
 
